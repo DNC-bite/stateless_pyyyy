@@ -1,0 +1,7 @@
+¡Hola, {{ nombre }}!
+
+Gracias por registrarte en STATELESS. Para activar tu cuenta abre este enlace:
+{{ url }}
+
+Este enlace expira en {{ horas }} horas.
+Si no creaste una cuenta en STATELESS, ignora este mensaje.
