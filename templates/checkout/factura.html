@@ -1,0 +1,91 @@
+{% load static stateless %}<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factura {{ venta.numero_factura }} - STATELESS</title>
+    <link rel="icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{% static 'css/invoice.css' %}" rel="stylesheet">
+</head>
+<body>
+
+<div class="invoice-card">
+
+    <div class="header">
+        <div>
+            <a href="{% url 'home' %}" class="logo-title">STATELESS</a>
+            <p class="empresa">{{ empresa }} • NIT: {{ nit }}</p>
+            <p class="subtitulo">{{ subtitulo }}</p>
+        </div>
+        <div class="derecha">
+            <p class="label">Comprobante de Venta</p>
+            <h2>FACTURA {{ venta.numero_factura }}</h2>
+            <p class="fecha">Fecha de emisión: {{ venta.created_at|date:"d/m/Y H:i" }}</p>
+            <p class="estado {% if venta.cancelada %}estado-cancelado{% elif venta.pago_pendiente %}estado-pendiente{% else %}estado-ok{% endif %}">{{ venta.estado_factura }}</p>
+        </div>
+    </div>
+
+    <div class="meta-grid">
+        <div>
+            <p class="label">Adquiriente / Cliente</p>
+            <p class="val">{{ venta.usuario.name|default:"Cliente Registrado" }}</p>
+            <p class="sub">{{ venta.usuario.email }}</p>
+        </div>
+        <div>
+            <p class="label">Lugar de Entrega &amp; Método</p>
+            <p class="val">{{ envio.direccion }}{% if envio.apartamento %} · {{ envio.apartamento }}{% endif %}</p>
+            <p class="sub">{{ envio.ciudad }}{% if envio.departamento %}, {{ envio.departamento }}{% endif %}</p>
+            <p class="sub" style="text-transform:uppercase; margin-top:4px; color:#777;">Pago: {{ venta.get_metodo_pago_display }}</p>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Descripción</th>
+                <th style="text-align:center;">Cant.</th>
+                <th style="text-align:right;">Precio Unit.</th>
+                <th style="text-align:right;">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>
+                    <strong>{{ item.producto.nombre }}</strong>
+                    {% if item.talla %}<span class="talla"> - Talla {{ item.talla }}</span>{% endif %}
+                    {% if item.variante %}<span class="color"> ({{ item.variante.color }})</span>{% endif %}
+                </td>
+                <td style="text-align:center;">{{ item.cantidad }}</td>
+                <td style="text-align:right; color:#bbb;">${{ item.precio_unitario|cop }}</td>
+                <td style="text-align:right; font-weight:700;">${{ item.subtotal|cop }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="totals-box">
+        <div class="total-row"><span>Subtotal (Base Imponible)</span><span>${{ venta.base_neta|cop }}</span></div>
+        <div class="total-row"><span>IVA Discriminado (19%)</span><span style="color:#fff;">${{ venta.iva|cop }}</span></div>
+        <div class="total-row"><span>Despacho Nacional Express</span><span style="color:#00ff88; font-weight:700;">GRATIS</span></div>
+        <div class="total-row total-highlight">
+            <span>Total COP</span>
+            <span class="monto">${{ venta.total|cop }}</span>
+        </div>
+    </div>
+
+    <div class="actions-bar">
+        <a href="{% url 'tracking' venta.id %}" class="btn btn-outline">← Rastrear Envío</a>
+        <div class="grupo">
+            <button type="button" onclick="window.print()" class="btn btn-outline">Imprimir</button>
+            <a href="{% url 'factura_pdf' venta.id %}" class="btn btn-white">Descargar PDF Oficial ↓</a>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

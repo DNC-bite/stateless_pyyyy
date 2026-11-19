@@ -1,0 +1,39 @@
+{% load static dashboard_tags %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Reporte financiero · STATELESS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{% static 'css/admin_dashboard.css' %}" rel="stylesheet">
+</head>
+<body class="report-page">
+<main class="report-content">
+    {% if messages %}<div class="admin-messages">{% for message in messages %}<p class="message {{ message.tags }}">{{ message }}</p>{% endfor %}</div>{% endif %}
+    <header class="report-header">
+        <div><a class="report-brand" href="{% url 'dashboard:inicio' %}">STATELESS</a><p>Dashboard financiero · consolidado de ventas e IVA (19%)</p></div>
+        <div class="report-actions"><a class="button button-dark" href="{% url 'dashboard:envios' %}">← Gestión de envíos</a><a class="button button-export" href="{% url 'dashboard:reporte_exportar' %}?{{ request.GET.urlencode }}">▥ Exportar a Excel</a><button class="button button-light" onclick="window.print()" type="button">Imprimir</button></div>
+    </header>
+    <form class="report-filter" method="get">
+        <label>Desde {{ form.desde }}</label><label>Hasta {{ form.hasta }}</label>
+        <button class="button button-light" type="submit">Filtrar</button><a href="{% url 'dashboard:reportes' %}">Limpiar filtros</a>
+        {% for field in form %}{{ field.errors }}{% endfor %}
+        <span>{{ cantidad }} transacciones encontradas</span>
+    </form>
+    <section class="report-stats">
+        <article><span>Ingresos brutos totales</span><strong>{{ total|cop }}</strong></article>
+        <article><span>Subtotal base neto</span><strong>{{ base|cop }}</strong></article>
+        <article><span>Recaudo IVA (19%)</span><strong class="text-green">{{ iva|cop }}</strong></article>
+        <article><span>Órdenes concretadas</span><strong>{{ cantidad }}</strong></article>
+        <article><span>Ticket promedio</span><strong>{{ ticket_promedio|cop }}</strong></article>
+    </section>
+    <div class="table-wrap report-table">
+        <table><thead><tr><th>Orden #</th><th>Cliente</th><th>Email</th><th>Método</th><th>Base neta</th><th>IVA (19%)</th><th>Total pagado</th><th>Estado</th></tr></thead>
+            <tbody>{% for venta in ventas %}
+                <tr><td><a href="{% url 'dashboard:venta_detalle' venta.pk %}">#{{ venta.pk }}</a></td><td>{{ venta.usuario.name }}</td><td>{{ venta.usuario.email }}</td><td>{{ venta.get_metodo_pago_display|upper }}</td><td>{{ venta.base_neta|cop }}</td><td>{{ venta.iva|cop }}</td><td><strong>{{ venta.total|cop }}</strong></td><td><span class="report-status">{{ venta.estado|upper }}</span></td></tr>
+            {% empty %}<tr><td class="empty-cell" colspan="8">No hay ventas para el período seleccionado.</td></tr>{% endfor %}</tbody>
+        </table>
+    </div>
+</main>
+</body>
+</html>

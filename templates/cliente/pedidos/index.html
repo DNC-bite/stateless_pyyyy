@@ -1,0 +1,37 @@
+{% extends "base_store.html" %}
+{% load stateless %}
+{% block title %}Mis compras — STATELESS{% endblock %}
+{% block content %}
+<section style="padding: 60px 40px; max-width: 900px; margin: 0 auto; color: #fff; background: #000; min-height:85vh;">
+    <h1 style="font-family:'Bebas Neue', sans-serif; font-size:40px; letter-spacing:3px; margin:0 0 6px;">MIS COMPRAS</h1>
+    <p style="opacity:0.5; margin-bottom:40px; font-size:12px; letter-spacing:1px; text-transform:uppercase;">Historial de pedidos realizados</p>
+
+    {% for v in ventas %}
+    <div style="border: 1px solid #222; padding: 25px; margin-bottom: 20px; background: #111;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+            <div>
+                <p style="font-size: 10px; opacity: 0.5; margin-bottom: 5px; letter-spacing:1px;">PEDIDO</p>
+                <h4 style="font-family:'Bebas Neue'; font-size:24px; letter-spacing: 2px; margin:0;">#{{ v.id }}</h4>
+            </div>
+            <div>
+                <p style="font-size: 10px; opacity: 0.5; margin-bottom: 5px; letter-spacing:1px;">FECHA</p>
+                <p style="margin:0; font-size:13px;">{{ v.created_at|date:"d/m/Y" }}</p>
+            </div>
+            <div>
+                <p style="font-size: 10px; opacity: 0.5; margin-bottom: 5px; letter-spacing:1px;">ESTADO</p>
+                <span style="font-weight:bold; font-size:12px; color:{% if v.estado == 'entregado' %}#00ff00{% elif v.estado == 'cancelado' %}#ff5555{% else %}#ff9900{% endif %};">{{ v.get_estado_display|upper }}</span>
+            </div>
+            <a href="{% url 'tracking' v.id %}"
+               style="background:#fff; color:#000; text-decoration:none; padding:8px 18px; font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase;">
+                RASTREAR
+            </a>
+        </div>
+    </div>
+    {% empty %}
+    <div style="text-align: center; padding: 60px 20px; opacity: 0.4;">
+        <p style="font-family:'Bebas Neue'; font-size:24px; letter-spacing:2px; margin-bottom:12px;">Aún no has realizado ninguna compra.</p>
+        <a href="{% url 'home' %}" style="color:#fff; font-size:11px; letter-spacing:2px; text-transform:uppercase; text-decoration:underline;">Explorar Colecciones →</a>
+    </div>
+    {% endfor %}
+</section>
+{% endblock %}

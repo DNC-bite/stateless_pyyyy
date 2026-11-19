@@ -1,0 +1,9 @@
+Tu pedido #{{ venta.id }} tiene un nuevo movimiento.
+
+Estado: {{ estado_legible }}
+Transportadora: {{ transportadora }}
+Número de guía: {{ guia }}
+
+Rastréalo aquí: {{ seguimiento_url }}
+
+STATELESS

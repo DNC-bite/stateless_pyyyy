@@ -1,0 +1,65 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+{% block title %}{{ titulo }} · Panel STATELESS{% endblock %}
+{% block content %}
+<div class="page-heading"><h1>{{ titulo }}</h1></div>
+<form class="form-card product-edit-form" method="post" enctype="multipart/form-data">
+    {% csrf_token %}{{ form.non_field_errors }}
+    <h2>Información del producto</h2>
+    <div class="form-grid">
+        {% for field in form %}
+            {% if field.name == 'imagen' %}
+                {{ field }}
+            {% elif field.name == 'modelo_3d' %}
+                {{ field }}
+            {% elif field.name == 'imagen_archivo' %}
+                {% include "dashboard/_image_upload.html" with upload_field=field stored_value=producto.imagen stored_url=producto.imagen_url wide=True %}
+            {% elif field.name == 'modelo_3d_archivo' %}
+                <div class="form-field field-wide">
+                    {{ field.label_tag }}{{ field }}{{ field.errors }}
+                    <small>Sube un archivo .glb de hasta 50 MB. La opción de vista 3D solo aparecerá en este producto.</small>
+                    {% if producto.modelo_3d %}<small>Modelo actual: <a href="{{ producto.modelo_3d }}" target="_blank" rel="noopener">abrir archivo</a></small>{% endif %}
+                </div>
+            {% elif field.name == 'modelo_3d_eliminar' %}
+                {% if producto.modelo_3d %}<div class="form-field">{{ field }}{{ field.label_tag }}{{ field.errors }}</div>{% endif %}
+            {% else %}
+                <div class="form-field {% if field.name == 'descripcion' %}field-wide{% endif %}">{{ field.label_tag }}{{ field }}{{ field.errors }}{% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}</div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <h2>Variantes de color</h2>{{ variantes.non_form_errors }}{{ variantes.management_form }}
+    {% for subform in variantes %}
+        <div class="inline-formset">
+            {{ subform.id }}
+            {% for field in subform %}
+                {% if field.name == 'imagen' %}
+                    {{ field }}
+                {% elif field.name == 'imagen_archivo' %}
+                    {% include "dashboard/_image_upload.html" with upload_field=field stored_value=subform.instance.imagen stored_url=subform.instance.imagen_url %}
+                {% elif field.name != 'DELETE' and field.name != 'id' %}
+                    <div class="form-field">{{ field.label_tag }}{{ field }}{{ field.errors }}</div>
+                {% endif %}
+            {% endfor %}
+            {% if subform.instance.pk %}<label class="delete-field">{{ subform.DELETE }} Eliminar variante</label>{% endif %}
+        </div>
+    {% endfor %}
+    <h2>Galería de imágenes</h2>{{ imagenes.non_form_errors }}{{ imagenes.management_form }}
+    {% for subform in imagenes %}
+        <div class="inline-formset">
+            {{ subform.id }}
+            {% for field in subform %}
+                {% if field.name == 'imagen' %}
+                    {{ field }}
+                {% elif field.name == 'imagen_archivo' %}
+                    {% include "dashboard/_image_upload.html" with upload_field=field stored_value=subform.instance.imagen stored_url=subform.instance.imagen_url %}
+                {% elif field.name != 'DELETE' and field.name != 'id' %}
+                    <div class="form-field">{{ field.label_tag }}{{ field }}{{ field.errors }}</div>
+                {% endif %}
+            {% endfor %}
+            {% if subform.instance.pk %}<label class="delete-field">{{ subform.DELETE }} Eliminar imagen</label>{% endif %}
+        </div>
+    {% endfor %}
+    <div class="form-actions"><button class="button button-primary" type="submit">Guardar producto</button><a class="button" href="{% url 'dashboard:productos' %}">Cancelar</a></div>
+</form>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/admin-image-upload.js' %}" defer></script>{% endblock %}

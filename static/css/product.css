@@ -1,0 +1,37 @@
+.producto-page { padding: 80px 60px; max-width: 1200px; margin: 0 auto; color: #fff; background: #000; }
+.producto-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start; }
+.producto-img { position: relative; overflow: hidden; }
+.producto-img img { width: 100%; height: 600px; object-fit: cover; display: block; }
+.producto-3d-trigger { width: 100%; margin-top: 12px; padding: 14px; border: 1px solid #444; background: #111; color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 2px; cursor: pointer; }
+.producto-3d-trigger:hover { border-color: #fff; }
+.producto-3d-dialog { width: min(900px, calc(100% - 32px)); max-width: none; padding: 20px; border: 1px solid #333; background: #090909; color: #fff; }
+.producto-3d-dialog::backdrop { background: rgba(0, 0, 0, .85); }
+.producto-3d-dialog-header { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.producto-3d-dialog-header h2 { margin: 0; font-size: 14px; letter-spacing: 2px; }
+.producto-3d-close { width: 40px; height: 40px; border: 1px solid #444; background: #111; color: #fff; font-size: 26px; cursor: pointer; }
+.producto-3d-dialog model-viewer { width: 100%; height: min(70vh, 650px); background: #111; }
+.producto-3d-hint { margin: 12px 0 0; color: #aaa; font-size: 12px; text-align: center; }
+.producto-cat { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.4; margin-bottom: 12px; }
+.producto-nombre { font-family: 'Bebas Neue', sans-serif; font-size: 56px; letter-spacing: 4px; margin-bottom: 16px; }
+.producto-precio { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 2px; margin-bottom: 24px; }
+.producto-desc { font-size: 14px; line-height: 1.8; opacity: 0.7; margin-bottom: 32px; }
+.bloque { margin-bottom: 28px; padding-top: 20px; border-top: 1px solid #222; }
+.bloque-label { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.4; margin: 0 0 12px; }
+.bloque-label b { color: #fff; font-weight: 600; opacity: 1; }
+.colores { display: flex; gap: 10px; flex-wrap: wrap; }
+.color-btn { width: 36px; height: 36px; border-radius: 50%; border: 2px solid #555; cursor: pointer; padding: 0; }
+.color-btn.selected { border: 3px solid #fff; }
+.color-btn.sin-stock { opacity: .35; position: relative; }
+.color-btn.sin-stock::after { content: ''; position: absolute; left: 4px; right: 4px; top: 50%; height: 2px; background: #fff; transform: rotate(-45deg); }
+.tallas-fila { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.tallas-fila .bloque-label { margin: 0; }
+.tallas { display: flex; gap: 10px; flex-wrap: wrap; }
+.talla-btn { min-width: 44px; height: 44px; padding: 0 14px; border: 1px solid #333; background: #0d0d0d; color: #fff; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; border-radius: 4px; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; }
+.talla-btn:hover { border-color: #777; background: #1a1a1a; }
+.talla-btn.selected { background: #fff; color: #000; border-color: #fff; box-shadow: 0 0 10px rgba(255,255,255,0.2); }
+.guia-tallas-link { font-size: 11px; color: #888; text-decoration: underline; cursor: pointer; transition: color 0.2s; background: none; border: 0; padding: 0; }
+.guia-tallas-link:hover { color: #fff; }
+.btn-carrito { width: 100%; padding: 16px; background: #fff; color: #000; border: none; font-weight: bold; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; }
+.btn-carrito[disabled] { background: #333; color: #888; cursor: not-allowed; }
+.talla-alert { display: none; color: #ff4444; font-size: 12px; margin-top: 10px; font-weight: 600; }
+@media (max-width: 900px) { .producto-page { padding: 40px 20px; } .producto-grid { grid-template-columns: 1fr; gap: 30px; } .producto-img img { height: 420px; } }

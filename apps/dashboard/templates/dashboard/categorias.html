@@ -1,0 +1,17 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Categorías · Panel STATELESS{% endblock %}
+{% block content %}
+<div class="page-heading"><h1>Lista de categorías</h1><a class="button button-primary" href="{% url 'dashboard:categoria_crear' %}">+ Registrar categoría</a></div>
+<div class="table-wrap panel-table">
+    <table><thead><tr><th>ID</th><th>Nombre de la colección</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody>{% for categoria in categorias %}
+            <tr><td>{{ categoria.pk }}</td><td><strong>{{ categoria.nombre|upper }}</strong></td>
+                <td><span class="badge {% if categoria.estado %}badge-green{% else %}badge-gray{% endif %}">{% if categoria.estado %}Activa{% else %}Inactiva{% endif %}</span></td>
+                <td class="actions"><a class="button button-small" href="{% url 'dashboard:categoria_editar' categoria.pk %}">Editar</a>
+                    <form method="post" action="{% url 'dashboard:categoria_eliminar' categoria.pk %}" onsubmit="return confirm('¿Eliminar esta categoría?')">{% csrf_token %}<button class="button button-small button-danger" type="submit">Eliminar</button></form>
+                </td>
+            </tr>
+        {% empty %}<tr><td class="empty-cell" colspan="4">No hay categorías registradas.</td></tr>{% endfor %}</tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% load static %}<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}STATELESS — Streetwear{% endblock %}</title>
+    <link rel="icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{% static 'css/store.css' %}" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar-stateless">
+        <a href="{% url 'home' %}" class="brand">STATELESS</a>
+
+        <ul class="nav-links">
+            <li><a href="{% url 'home' %}">INICIO</a></li>
+            <li><a href="{% url 'essentials' %}">ESSENTIALS</a></li>
+            <li><a href="{% url 'waves' %}">WAVES</a></li>
+            <li><a href="{% url 'octane' %}">OCTANE</a></li>
+        </ul>
+
+        <div class="nav-right">
+            <a href="{% url 'carrito' %}">CARRITO <span class="cart-badge">{{ cart_count|default:0 }}</span></a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'cuenta' %}">MI CUENTA</a>
+            {% else %}
+                <a href="{% url 'login' %}">INGRESAR</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    {% block mensajes %}
+        {% if messages %}
+        <div class="store-messages">
+            {% for message in messages %}
+                <div class="store-alert store-alert-{{ message.level_tag|default:'info' }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endblock %}
+
+    {% block content %}{% endblock %}
+
+    <footer class="footer-stateless">
+        <div style="font-family:'Bebas Neue'; font-size:32px; letter-spacing:6px; margin-bottom:10px;">STATELESS</div>
+        <p style="font-size:11px; opacity:0.4; letter-spacing:2px; text-transform:uppercase;">Define tu mundo. Sin etiquetas.</p>
+        <p style="font-size:11px; opacity:0.3; margin-top:20px;">© {% now "Y" %} STATELESS. Todos los derechos reservados.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

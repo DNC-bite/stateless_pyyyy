@@ -1,0 +1,81 @@
+{% extends "base_store.html" %}
+{% load static stateless %}
+{% block title %}{{ producto.nombre }} — STATELESS{% endblock %}
+{% block extra_css %}<link href="{% static 'css/product.css' %}" rel="stylesheet">{% endblock %}
+{% block content %}
+<section class="producto-page" id="producto-page"
+         data-requiere-talla="{{ producto.requiere_talla|yesno:'true,false' }}"
+         data-tipo-talla="{{ producto.tipo_talla_efectivo }}"
+         data-stock-unico="{{ producto.stock_actual }}">
+<div class="producto-grid">
+
+    <div class="producto-img">
+        <img id="main-product-img" src="{{ producto.imagen_url }}" data-original="{{ producto.imagen_url }}" alt="{{ producto.nombre }}"
+             onerror="this.onerror=null;this.src='{% static 'images/placeholder.svg' %}';">
+        {% if producto.modelo_3d %}
+        <button type="button" class="producto-3d-trigger" id="open-model-3d" aria-haspopup="dialog">
+            VER EN 3D
+        </button>
+        <dialog class="producto-3d-dialog" id="model-3d-dialog" aria-label="Vista 3D de {{ producto.nombre }}">
+            <div class="producto-3d-dialog-header">
+                <h2>{{ producto.nombre }} · VISTA 3D</h2>
+                <button type="button" class="producto-3d-close" id="close-model-3d" aria-label="Cerrar vista 3D">×</button>
+            </div>
+            <model-viewer src="{{ producto.modelo_3d }}" alt="Modelo 3D de {{ producto.nombre }}"
+                          camera-controls auto-rotate shadow-intensity="1" exposure="1"
+                          poster="{{ producto.imagen_url }}" loading="lazy">
+            </model-viewer>
+            <p class="producto-3d-hint">Arrastra para girar · Desliza para acercar</p>
+        </dialog>
+        {% endif %}
+    </div>
+
+    <div>
+        <p class="producto-cat">{{ producto.categoria.nombre }}</p>
+        <h1 class="producto-nombre" id="product-name">{{ producto.nombre }}</h1>
+        <p class="producto-precio">${{ producto.precio|cop }}</p>
+        <p class="producto-desc">{{ producto.descripcion|default:"Diseño exclusivo de la colección oficial STATELESS." }}</p>
+
+        {% if variantes %}
+        <div class="bloque">
+            <p class="bloque-label">COLOR: <b id="color-nombre">Original</b></p>
+            <div class="colores">
+                <button type="button" class="color-btn selected{% if producto.stock_actual <= 0 %} sin-stock{% endif %}" title="Color Original"
+                        data-id="" data-nombre="Original" data-imagen="" data-stock="{{ producto.stock_actual }}" style="background:#333;"></button>
+                {% for v in variantes %}
+                <button type="button" class="color-btn{% if v.stock_actual <= 0 %} sin-stock{% endif %}" title="{{ v.color }}"
+                        data-id="{{ v.id }}" data-nombre="{{ v.color }}" data-imagen="{{ v.imagen_url }}" data-stock="{{ v.stock_actual }}"
+                        style="background:{{ v.hex }};"></button>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if tallas %}
+        <div class="bloque">
+            <div class="tallas-fila">
+                <p class="bloque-label">TALLA: <b id="talla-seleccionada-label">SELECCIONA</b></p>
+                <button type="button" class="guia-tallas-link" id="guia-tallas">Guía de tallas</button>
+            </div>
+            <div class="tallas">
+                {% for t in tallas %}<button type="button" class="talla-btn" data-talla="{{ t }}">{{ t }}</button>{% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'carrito_agregar' producto.id %}" id="form-add-cart">
+            {% csrf_token %}
+            <input type="hidden" name="varianteId" id="selected-variante-id" value="">
+            <input type="hidden" name="talla" id="selected-talla" value="">
+            <button type="submit" id="btn-carrito" class="btn-carrito">AÑADIR AL CARRITO</button>
+        </form>
+
+        <p id="talla-alert" class="talla-alert">⚠️ Por favor selecciona una talla antes de añadir al carrito.</p>
+    </div>
+</div>
+</section>
+{% endblock %}
+{% block extra_js %}
+{% if producto.modelo_3d %}<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.1.0/model-viewer.min.js"></script>{% endif %}
+<script src="{% static 'js/product.js' %}"></script>
+{% endblock %}

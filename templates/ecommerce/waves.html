@@ -1,0 +1,48 @@
+{% extends "base_store.html" %}
+{% load static stateless %}
+{% block title %}Waves — STATELESS{% endblock %}
+{% block extra_css %}<link href="{% static 'css/waves.css' %}" rel="stylesheet">{% endblock %}
+{% block content %}
+<section style="background:#fff; color:#000; min-height:100vh;">
+
+<div class="waves-hero">
+    <canvas id="waveCanvas"></canvas>
+    <div class="waves-hero-texto">
+        <p>MÁS ALLÁ DEL RUIDO</p>
+        <a href="#catalogo-waves">VER COLECCIÓN</a>
+    </div>
+</div>
+
+<div id="catalogo-waves" class="waves-catalogo">
+    <div class="waves-catalogo-head">
+        <div>
+            <p>Catálogo</p>
+            <h2>ROPA WAVES</h2>
+        </div>
+        <span>Frecuencias de audio</span>
+    </div>
+
+    <div class="waves-grid">
+        {% for p in productos %}
+        <div class="waves-card">
+            {% if p.agotado %}<span class="waves-agotado">AGOTADO</span>{% endif %}
+            <a class="enlace" href="{% url 'producto' p.id %}">
+                <img src="{{ p.imagen_url }}" alt="{{ p.nombre }}" loading="lazy">
+                <p class="nombre">{{ p.nombre }}</p>
+                <p class="precio">${{ p.precio|cop }} COP</p>
+            </a>
+            {% if p.agotado %}
+                <span class="waves-btn agotado">Agotado</span>
+            {% else %}
+                <a href="{% url 'producto' p.id %}" class="waves-btn">Elegir Talla</a>
+            {% endif %}
+        </div>
+        {% empty %}
+        <p class="waves-vacio">Pronto nuevas prendas.</p>
+        {% endfor %}
+    </div>
+</div>
+
+</section>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/waves-hero.js' %}"></script>{% endblock %}

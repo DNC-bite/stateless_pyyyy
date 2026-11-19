@@ -1,0 +1,33 @@
+{% load stateless %}<div style="background:#000; color:#fff; font-family:'Helvetica Neue', Arial, sans-serif; padding:40px 20px; max-width:600px; margin:0 auto; border:1px solid #222;">
+    <div style="text-align:center; border-bottom:1px solid #333; padding-bottom:20px; margin-bottom:30px;">
+        <h1 style="font-size:32px; letter-spacing:4px; margin:0; color:#fff;">STATELESS</h1>
+        <p style="font-size:12px; letter-spacing:2px; text-transform:uppercase; color:#888; margin-top:6px;">{% if pagado %}Pago Confirmado Exitosamente{% else %}Pedido Recibido{% endif %}</p>
+    </div>
+
+    <p style="font-size:15px; line-height:1.6; color:#ccc;">Hola <strong>{{ nombre }}</strong>,</p>
+    <p style="font-size:14px; line-height:1.6; color:#aaa;">
+        {% if pagado %}Hemos recibido tu pago para la orden{% else %}Recibimos tu pedido{% endif %} <strong>#{{ venta.id }}</strong> por un total de <strong>${{ venta.total|cop }} COP</strong>.
+    </p>
+
+    <div style="background:#111; border:1px solid #222; padding:20px; margin:24px 0;">
+        <p style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#777; margin:0 0 8px;">Método de Pago</p>
+        <p style="font-size:14px; font-weight:bold; color:#fff; margin:0 0 16px;">{{ metodo }}</p>
+
+        <p style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#777; margin:0 0 8px;">Estado</p>
+        {% if pagado %}
+        <p style="font-size:14px; font-weight:bold; color:#00ff88; margin:0;">PAGO APROBADO</p>
+        {% else %}
+        <p style="font-size:14px; font-weight:bold; color:#ffaa00; margin:0;">PENDIENTE DE PAGO{% if venta.codigo_pago %} · Código {{ venta.codigo_pago }}{% endif %}</p>
+        {% endif %}
+    </div>
+
+    <div style="text-align:center; margin:36px 0;">
+        <a href="{{ seguimiento_url }}" style="background:#fff; color:#000; padding:14px 28px; font-size:12px; font-weight:bold; letter-spacing:2px; text-transform:uppercase; text-decoration:none; display:inline-block;">
+            Rastrear mi Pedido →
+        </a>
+    </div>
+
+    <p style="font-size:11px; text-align:center; color:#555; border-top:1px solid #222; padding-top:20px; margin-top:40px;">
+        © STATELESS CLOTHING. Todos los derechos reservados.
+    </p>
+</div>

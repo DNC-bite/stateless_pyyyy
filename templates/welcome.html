@@ -1,0 +1,86 @@
+{% extends "base_store.html" %}
+{% load static stateless %}
+{% block extra_css %}<link href="{% static 'css/home.css' %}" rel="stylesheet">{% endblock %}
+{% block content %}
+<div class="hero">
+    <div class="hero-slide active">
+        <div class="slide-bg" style="background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0d0d0d 100%);"></div>
+        <div class="slide-content">
+            <p class="slide-tag">Nueva Colección 2026</p>
+            <h1 class="slide-title">STATELESS</h1>
+            <div class="slide-line"></div>
+            <p class="slide-sub">Define tu mundo. Sin etiquetas.</p>
+            <a href="{% url 'essentials' %}" class="slide-cta">Ver Essentials</a>
+        </div>
+    </div>
+    <div class="hero-slide">
+        <div class="slide-bg" style="background: linear-gradient(135deg, #111 0%, #1c1c1c 50%, #0a0a0a 100%);"></div>
+        <div class="slide-content">
+            <p class="slide-tag">Colección</p>
+            <h1 class="slide-title">WAVES</h1>
+            <div class="slide-line"></div>
+            <p class="slide-sub">Fluye. Sin resistencia.</p>
+            <a href="{% url 'waves' %}" class="slide-cta">Explorar colección</a>
+        </div>
+    </div>
+    <div class="hero-slide">
+        <div class="slide-bg" style="background: linear-gradient(135deg, #0a0a0a 0%, #120012 50%, #1a1a1a 100%);"></div>
+        <div class="slide-content">
+            <p class="slide-tag">Colección</p>
+            <h1 class="slide-title">OCTANE</h1>
+            <div class="slide-line"></div>
+            <p class="slide-sub">Velocidad, calle y actitud.</p>
+            <a href="{% url 'octane' %}" class="slide-cta">Explorar colección</a>
+        </div>
+    </div>
+
+    <button class="hero-ctrl" data-slide-dir="-1" style="left:24px;" aria-label="Anterior">‹</button>
+    <button class="hero-ctrl" data-slide-dir="1" style="right:24px;" aria-label="Siguiente">›</button>
+
+    <div class="hero-dots">
+        <button class="hero-dot active" aria-label="Diapositiva 1"></button>
+        <button class="hero-dot" aria-label="Diapositiva 2"></button>
+        <button class="hero-dot" aria-label="Diapositiva 3"></button>
+    </div>
+    <div class="hero-counter"><span id="slide-num">01</span> / 03</div>
+</div>
+
+<div class="essentials-section" id="essentials">
+    <div class="section-header">
+        <div class="section-header-left">
+            <p>Destacados</p>
+            <h2>ESSENTIALS</h2>
+        </div>
+        <div><a href="{% url 'essentials' %}">Ver toda la colección →</a></div>
+    </div>
+
+    <div class="essentials-track-wrap">
+        <div class="essentials-track" id="essentials-track">
+            {% for p in essentials %}
+            <div class="essentials-item">
+                <a href="{% url 'producto' p.id %}" style="text-decoration:none;">
+                    <div class="essentials-img-wrap">
+                        <span class="essentials-num">{{ forloop.counter|stringformat:"02d" }}</span>
+                        {% if p.agotado %}<span class="badge-agotado">AGOTADO</span>{% endif %}
+                        <img src="{{ p.imagen_url }}" alt="{{ p.nombre }}" loading="lazy">
+                    </div>
+                </a>
+                <div class="essentials-item-body">
+                    <a href="{% url 'producto' p.id %}" style="text-decoration:none;"><p class="essentials-item-name">{{ p.nombre }}</p></a>
+                    <p class="essentials-item-price">${{ p.precio|cop }} COP</p>
+                    <a href="{% url 'producto' p.id %}" class="btn-stateless-card">Elegir Talla &amp; Comprar</a>
+                </div>
+            </div>
+            {% empty %}
+            <p class="essentials-vacio" style="width:100%;">Pronto nuevas prendas.</p>
+            {% endfor %}
+        </div>
+
+        {% if essentials %}
+        <button class="hero-ctrl" data-ess-dir="-1" style="left:0; top:40%; background:#000; color:#fff;" aria-label="Anterior">‹</button>
+        <button class="hero-ctrl" data-ess-dir="1" style="right:0; top:40%; background:#000; color:#fff;" aria-label="Siguiente">›</button>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/home.js' %}"></script>{% endblock %}

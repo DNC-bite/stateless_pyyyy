@@ -1,0 +1,85 @@
+{% extends "base_store.html" %}
+{% load static stateless %}
+{% block title %}Tu carrito — STATELESS{% endblock %}
+{% block extra_css %}<link href="{% static 'css/cart.css' %}" rel="stylesheet">{% endblock %}
+{% block content %}
+<section class="cart-page">
+<div class="cart-wrap">
+
+    <div class="cart-head">
+        <div>
+            <p>Bolsa de Compras</p>
+            <h1>TU CARRITO</h1>
+        </div>
+        <a href="{% url 'home' %}">← Continuar Comprando</a>
+    </div>
+
+    {% if not lineas %}
+    <div class="cart-vacio">
+        <p>TU BOLSA ESTÁ VACÍA</p>
+        <a href="{% url 'home' %}">Ver Colecciones</a>
+    </div>
+    {% else %}
+    <div class="cart-grid">
+
+        <div>
+            {% for l in lineas %}
+            <div class="cart-item">
+                <img src="{{ l.producto.imagen_url }}" alt="{{ l.producto.nombre }}">
+
+                <div class="info">
+                    <h3>{{ l.producto.nombre }}</h3>
+                    {% if l.variante or l.talla %}
+                    <p class="meta">
+                        {% if l.variante %}Color: <b>{{ l.variante.color }}</b>{% endif %}{% if l.variante and l.talla %} | {% endif %}{% if l.talla %}Talla: <b>{{ l.talla }}</b>{% endif %}
+                    </p>
+                    {% endif %}
+                    <p class="precio">${{ l.precio_unitario|cop }} COP</p>
+                    {% if l.problema %}<p class="problema">{{ l.problema }}</p>{% endif %}
+
+                    <form method="post" action="{% url 'carrito_eliminar' %}" style="margin:0;">
+                        {% csrf_token %}
+                        <input type="hidden" name="linea" value="{{ l.id }}">
+                        <button type="submit" class="btn-remove-item">Eliminar</button>
+                    </form>
+                </div>
+
+                <div>
+                    <form method="post" action="{% url 'carrito_actualizar' %}" style="margin:0;">
+                        {% csrf_token %}
+                        <input type="hidden" name="linea" value="{{ l.id }}">
+                        {# Botón oculto: es el que se activa al pulsar Enter en el campo (sin "delta"). #}
+                        <button type="submit" tabindex="-1" aria-hidden="true" style="position:absolute; left:-9999px; width:1px; height:1px;"></button>
+                        <div class="qty-box">
+                            <button type="submit" name="delta" value="-1" class="qty-btn" title="Disminuir">−</button>
+                            <input type="number" name="cantidad" value="{{ l.cantidad }}" min="1" class="qty-input" onchange="this.form.submit()" aria-label="Cantidad">
+                            <button type="submit" name="delta" value="1" class="qty-btn" title="Aumentar">+</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="subtotal">${{ l.subtotal|cop }} COP</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="cart-resumen">
+            <h3>RESUMEN</h3>
+            <div class="fila"><span>Subtotal</span><span>${{ total|cop }} COP</span></div>
+            <div class="fila" style="margin-bottom:20px;"><span>Envío</span><span class="gratis">GRATIS</span></div>
+            <div class="total"><strong>TOTAL</strong><span>${{ total|cop }} COP</span></div>
+
+            {% if hay_problemas %}
+                <span class="btn-pagar bloqueado">PROCEDER AL PAGO →</span>
+                <p class="cart-bloqueo">Hay productos agotados o con menos stock del que pediste. Ajusta la cantidad o elimínalos para continuar.</p>
+            {% else %}
+                <a href="{% url 'checkout' %}" class="btn-pagar">PROCEDER AL PAGO →</a>
+            {% endif %}
+        </div>
+
+    </div>
+    {% endif %}
+
+</div>
+</section>
+{% endblock %}

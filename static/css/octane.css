@@ -1,0 +1,34 @@
+:root { --drift-blue: #af0eaf; --drift-border: #232323; }
+.octane-page { background: #000; color: #fff; min-height: 100vh; position: relative; overflow: hidden; }
+#smokeCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0.18; }
+.hero-octane { min-height: 90vh; display: flex; align-items: center; justify-content: center; text-align: center; position: relative; background: #000; }
+.hero-octane-inner { position: relative; z-index: 2; }
+.hero-octane .tag { font-size: 12px; letter-spacing: 6px; text-transform: uppercase; color: var(--drift-blue); margin-bottom: 15px; font-weight: bold; }
+.hero-octane h1 { font-family: 'Bebas Neue'; font-size: clamp(5rem, 12vw, 10rem); letter-spacing: 10px; line-height: 0.9; margin-bottom: 20px; }
+.hero-octane p { letter-spacing: 4px; text-transform: uppercase; opacity: 0.8; margin-bottom: 30px; }
+.hero-octane a { border: 1px solid var(--drift-blue); color: #fff; padding: 14px 35px; text-decoration: none; display: inline-block; letter-spacing: 2px; text-transform: uppercase; }
+.rpm-section { background: #050505; padding: 50px 40px; display: flex; justify-content: center; gap: 60px; border-top: 1px solid #1a1a1a; border-bottom: 1px solid #1a1a1a; flex-wrap: wrap; position: relative; z-index: 2; }
+.rpm-gauge { text-align: center; }
+.rpm-gauge > span { font-size: 10px; letter-spacing: 3px; opacity: 0.4; text-transform: uppercase; }
+.rpm-gauge .valor { font-family: 'Bebas Neue'; font-size: 24px; color: var(--drift-blue); }
+.rpm-bars { display: flex; gap: 4px; align-items: flex-end; height: 50px; justify-content: center; margin: 10px 0; }
+.rpm-bar-item { width: 7px; border-radius: 2px 2px 0 0; background: #1a1a1a; }
+.octane-catalogo { padding: 100px 40px; background: #000; position: relative; z-index: 2; }
+.octane-catalogo-head { text-align: center; margin-bottom: 50px; }
+.octane-catalogo-head p { opacity: 0.5; letter-spacing: 4px; font-size: 12px; }
+.octane-catalogo-head h2 { font-family: 'Bebas Neue'; font-size: 4rem; letter-spacing: 5px; margin: 0; }
+.octane-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; }
+.product-card-octane { background: #101010; border: 1px solid var(--drift-border); transition: 0.3s; overflow: hidden; position: relative; }
+.product-card-octane:hover { transform: translateY(-8px); border-color: var(--drift-blue); box-shadow: 0 0 25px rgba(175, 14, 175, .3); }
+.product-card-octane a.enlace { text-decoration: none; color: #fff; }
+.product-card-octane img { width: 100%; aspect-ratio: 3/4; object-fit: cover; display: block; }
+.product-card-octane .info { padding: 20px; }
+.product-card-octane .unit { font-size: 10px; letter-spacing: 2px; opacity: 0.3; font-family: monospace; margin-bottom: 6px; }
+.product-card-octane h3 { font-size: 16px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+.product-card-octane .price { opacity: 0.6; font-size: 13px; font-family: monospace; }
+.btn-octane-cart { display: block; width: 100%; text-align: center; text-decoration: none; border: none; background: transparent; border-top: 1px solid var(--drift-border); color: #fff; padding: 14px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; font-family: monospace; font-weight: bold; transition: 0.3s; }
+.btn-octane-cart:hover { background: var(--drift-blue); color: #000; }
+.btn-octane-cart.agotado { color: #666; cursor: not-allowed; }
+.btn-octane-cart.agotado:hover { background: transparent; color: #666; }
+.octane-agotado { position: absolute; top: 12px; left: 12px; background: var(--drift-blue); color: #000; font-family: monospace; font-size: 10px; font-weight: 800; letter-spacing: 2px; padding: 4px 10px; z-index: 2; }
+.octane-vacio { grid-column: 1 / -1; text-align: center; padding: 60px 0; opacity: .3; font-family: 'Bebas Neue'; font-size: 24px; }

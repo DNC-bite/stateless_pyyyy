@@ -1,0 +1,12 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Editar usuario · Panel STATELESS{% endblock %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">Usuario #{{ usuario.pk }}</p><h1>Editar usuario</h1></div></div>
+<form class="form-card" method="post">
+    {% csrf_token %}{{ form.non_field_errors }}
+    {% for field in form %}
+        <div class="form-field">{{ field.label_tag }}{{ field }}{{ field.errors }}{% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}</div>
+    {% endfor %}
+    <div class="form-actions"><button class="button button-primary" type="submit">Guardar cambios</button><a class="button" href="{% url 'dashboard:usuarios' %}">Cancelar</a></div>
+</form>
+{% endblock %}

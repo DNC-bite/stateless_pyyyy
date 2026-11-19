@@ -1,0 +1,46 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body { background: #000; margin: 0; overflow-x: hidden; font-family: 'Inter', sans-serif; color: #fff; }
+#wavesCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+.auth-brand { position: fixed; top: 24px; left: 32px; color: #fff; font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 3px; z-index: 10; }
+.auth-brand a { color: #fff; text-decoration: none; }
+.auth-wrap { position: relative; z-index: 2; }
+.auth-card {
+    position: relative; z-index: 2; background: rgba(0, 0, 0, 0.65); border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 40px 36px; width: 100%; max-width: 400px; backdrop-filter: blur(8px); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+}
+.auth-card label { color: rgba(255, 255, 255, 0.7); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; display: block; font-weight: 600; }
+.auth-card .form-control {
+    width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff;
+    padding: 12px 14px; margin-bottom: 16px; font-size: 13px; border-radius: 0; outline: none; transition: all 0.2s ease;
+}
+.auth-card .form-control:focus { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.6); color: #fff; box-shadow: 0 0 10px rgba(255, 255, 255, 0.15); }
+.auth-card .form-control::placeholder { color: rgba(255, 255, 255, 0.3); }
+.auth-card .btn-stateless {
+    width: 100%; background: #fff; color: #000; border: none; padding: 13px; font-family: 'Bebas Neue', sans-serif; letter-spacing: 2px;
+    font-size: 16px; cursor: pointer; border-radius: 0; transition: all 0.2s ease; font-weight: 700; display: block; text-align: center; text-decoration: none;
+}
+.auth-card .btn-stateless:hover { background: #e5e5e5; color: #000; transform: translateY(-1px); }
+.auth-card a { color: rgba(255, 255, 255, 0.6); text-decoration: none; transition: color 0.2s; }
+.auth-card a:hover { color: #fff; text-decoration: underline; }
+.auth-card h2 { font-family: 'Bebas Neue', sans-serif; color: #fff; font-size: 32px; letter-spacing: 3px; margin: 0 0 4px; }
+.auth-card .subtitle { color: rgba(255, 255, 255, 0.5); font-size: 12px; letter-spacing: 1px; margin: 0 0 24px; }
+
+/* Avisos (los mismos colores que tenían las plantillas, ahora en clases) */
+.auth-card .alert { font-size: 12px; line-height: 1.5; border-radius: 0; margin-bottom: 20px; border: 1px solid; }
+.sl-alert-success { background: #002b0c; border-color: #00c030; color: #8affaa; }
+.sl-alert-error { background: #2b0000; border-color: #c00; color: #ff8a8a; }
+.sl-alert-warning { background: #2b2200; border-color: #c09000; color: #ffd77a; }
+.sl-alert-info { background: #0d1a2b; border-color: #2f6fb3; color: #a9cdf3; }
+.sl-field-error { color: #ff8a8a; font-size: 11px; margin: -10px 0 14px; }
+
+.link-button { background: none; border: 0; padding: 0; color: rgba(255, 255, 255, 0.8); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; text-decoration: underline; cursor: pointer; }
+.link-button:hover { color: #fff; }
+.auth-sep { display: flex; align-items: center; gap: 16px; margin-top: 28px; margin-bottom: 20px; }
+.auth-sep div { flex: 1; height: 1px; background: rgba(255, 255, 255, 0.1); }
+.auth-sep span { font-size: 10px; letter-spacing: 2px; color: rgba(255, 255, 255, 0.4); text-transform: uppercase; }
+.btn-google {
+    display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 11px; color: #fff; background: transparent; font-family: inherit; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: background 0.2s;
+}
+.btn-google:hover { background: rgba(255, 255, 255, 0.08); }

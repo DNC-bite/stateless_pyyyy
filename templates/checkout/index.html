@@ -1,0 +1,195 @@
+{% load static stateless %}<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout Seguro - STATELESS</title>
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <link rel="icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{% static 'css/checkout.css' %}" rel="stylesheet">
+</head>
+<body>
+
+<div class="checkout-layout">
+
+    <!-- COLUMNA IZQUIERDA -->
+    <div class="left-col">
+        <div class="logo-header">
+            <a href="{% url 'home' %}" class="logo-title">STATELESS</a>
+            <a href="{% url 'carrito' %}" style="color:#000; text-decoration:none; font-size:18px;" title="Ver carrito">🛒</a>
+        </div>
+
+        <div class="express-box">
+            <p class="express-label">Pago exprés</p>
+            <div class="express-grid">
+                <button type="button" class="btn-express btn-shop" data-metodo="shop_pay" data-nombre="Shop Pay">shop</button>
+                <button type="button" class="btn-express btn-paypal" data-metodo="paypal" data-nombre="PayPal">PayPal</button>
+                <button type="button" class="btn-express btn-gpay" data-metodo="google_pay" data-nombre="Google Pay">G Pay</button>
+            </div>
+        </div>
+
+        <div id="expressNotice" class="alert-express">
+            <span id="expressNoticeText">✓ Método Exprés seleccionado.</span>
+            <button type="button" id="expressReset">Restablecer</button>
+        </div>
+
+        <div class="divider"><span>O CONTINUAR CON EL FORMULARIO</span></div>
+
+        <form id="checkoutForm" data-url-procesar="{% url 'procesar_pedido' %}" novalidate>
+
+            <div class="section-title">Contacto</div>
+            <div class="form-group">
+                <input type="email" id="email" class="input-field" placeholder="Correo electrónico" value="{{ user.email }}" readonly aria-label="Correo electrónico">
+            </div>
+            <label style="display:flex; align-items:center; gap:8px; font-size:12px; color:#555; margin-bottom:20px;">
+                <input type="checkbox" checked disabled style="accent-color:#000;">
+                Te enviaremos la confirmación del pedido a este correo
+            </label>
+
+            <div class="section-title">Entrega y Domicilio</div>
+
+            <div class="form-group">
+                <select class="input-field" id="pais" aria-label="País"><option value="Colombia" selected>Colombia</option></select>
+            </div>
+
+            <div class="grid-2 form-group">
+                <input type="text" id="nombre" class="input-field" placeholder="Nombre" value="{{ nombre_inicial }}" autocomplete="given-name" required>
+                <input type="text" id="apellidos" class="input-field" placeholder="Apellidos" value="{{ apellidos_inicial }}" autocomplete="family-name" required>
+            </div>
+
+            <div class="form-group">
+                <input type="text" id="direccion" class="input-field" placeholder="Dirección exacta (ej. Carrera 11A # 93-93)" autocomplete="address-line1" required>
+            </div>
+
+            <div class="form-group">
+                <input type="text" id="apartamento" class="input-field" placeholder="Casa, apartamento, torre, etc. (opcional)" autocomplete="address-line2">
+            </div>
+
+            <div class="grid-3 form-group">
+                <input type="text" id="ciudad" class="input-field" placeholder="Ciudad" autocomplete="address-level2" required>
+                <select class="input-field" id="departamento" autocomplete="address-level1" required>
+                    <option value="" selected disabled>Departamento</option>
+                    {% for d in departamentos %}<option value="{{ d }}">{{ d }}</option>{% endfor %}
+                </select>
+                <input type="text" id="codigoPostal" class="input-field" placeholder="Código postal" autocomplete="postal-code" required>
+            </div>
+
+            <div class="form-group">
+                <input type="tel" id="telefono" class="input-field" placeholder="Teléfono celular de contacto" autocomplete="tel" required>
+            </div>
+
+            <div class="section-title">Método de Envío</div>
+            <div style="border:1px solid #000; border-radius:6px; padding:16px; display:flex; justify-content:space-between; align-items:center; background:#fff;">
+                <div>
+                    <strong style="display:block; font-size:13px;">Standard Express Nacional</strong>
+                    <span style="font-size:11px; color:#777;">Despacho directo asegurado (2 - 4 días hábiles)</span>
+                </div>
+                <strong style="font-size:13px; color:#000;">$ 0 COP (Gratis)</strong>
+            </div>
+
+            <div class="section-title">Método de Pago</div>
+
+            <div class="payment-card-box">
+                <div class="payment-header">
+                    <label style="display:flex; align-items:center; gap:10px; font-weight:700; cursor:pointer;">
+                        <input type="radio" id="rb_tarjeta" name="metodo_pago" value="tarjeta_credito" checked style="accent-color:#000;">
+                        <span>Tarjeta de crédito / débito</span>
+                    </label>
+                    <span style="font-size:11px; color:#666;">VISA • MASTERCARD</span>
+                </div>
+
+                <div class="payment-body" id="tarjetaFields">
+                    <div class="form-group"><input type="text" id="cc_numero" class="input-field" placeholder="Número de tarjeta (16 dígitos)" maxlength="19" inputmode="numeric" autocomplete="off"></div>
+                    <div class="grid-2 form-group">
+                        <input type="text" id="cc_exp" class="input-field" placeholder="Vencimiento (MM / AA)" maxlength="5" inputmode="numeric" autocomplete="off">
+                        <input type="password" id="cc_cvv" class="input-field" placeholder="Código CVV" maxlength="4" inputmode="numeric" autocomplete="off">
+                    </div>
+                    <div class="form-group"><input type="text" id="cc_titular" class="input-field" placeholder="Nombre completo del titular" autocomplete="off"></div>
+                </div>
+
+                <div class="payment-header" style="background:#fff; border-top:1px solid #e1e1e1;">
+                    <label style="display:flex; align-items:center; gap:10px; font-weight:700; cursor:pointer;">
+                        <input type="radio" id="rb_paypal" name="metodo_pago" value="paypal" style="accent-color:#000;">
+                        <span>PayPal / Billetera Digital</span>
+                    </label>
+                    <span style="font-weight:bold; font-style:italic; color:#003087;">PayPal</span>
+                </div>
+            </div>
+
+            <div id="error-msg" class="error-msg" role="alert"></div>
+
+            <button type="submit" id="btnProcesar" class="btn-submit-glitch">Pagar ahora</button>
+
+            {% if modo_demo_pagos %}
+            <p class="demo-aviso"><strong>Modo demostración:</strong> no se realizará ningún cobro y los datos de la tarjeta no se envían ni se guardan.</p>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- COLUMNA DERECHA -->
+    <div class="right-col">
+        <div class="right-inner">
+
+            <div>
+                {% for l in lineas %}
+                <div class="cart-item-row">
+                    <div style="display:flex; align-items:center;">
+                        <div class="item-thumb-wrapper">
+                            <span class="item-badge">{{ l.cantidad }}</span>
+                            <img src="{% if l.variante and l.variante.imagen %}{{ l.variante.imagen_url }}{% else %}{{ l.producto.imagen_url }}{% endif %}" alt="" class="item-img">
+                        </div>
+                        <div>
+                            <p class="item-nombre">{{ l.producto.nombre }}</p>
+                            {% if l.variante or l.talla %}
+                            <p class="item-detalle">{% if l.variante %}{{ l.variante.color }}{% endif %}{% if l.variante and l.talla %} · {% endif %}{% if l.talla %}Talla {{ l.talla }}{% endif %}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div style="font-weight:700; font-size:13px; color:#fff;">${{ l.subtotal|cop }}</div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="totales">
+                <div class="fila"><span>Subtotal Neto</span><span>$ {{ base|cop }}</span></div>
+                <div class="fila"><span>IVA (19%)</span><span style="color:#fff; font-weight:600;">$ {{ iva|cop }}</span></div>
+                <div class="fila"><span>Envío Nacional</span><span style="color:#00ff88; font-weight:700;">GRATIS</span></div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+                <span style="font-size:15px; font-weight:700; letter-spacing:1px; text-transform:uppercase;">Total a Pagar</span>
+                <div>
+                    <span style="font-size:11px; color:#777; margin-right:6px;">COP</span>
+                    <span id="total-val" style="font-family:'Bebas Neue'; font-size:32px; letter-spacing:2px;">$ {{ total|cop }}</span>
+                </div>
+            </div>
+
+            {% if sugerencias %}
+            <div class="cross-sell-title">— Completa tu outfit STATELESS —</div>
+            {% for s in sugerencias %}
+            <div class="cross-sell-card">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div style="width:48px; height:48px; background:#181818; border-radius:8px; border:1px solid #282828; overflow:hidden; flex-shrink:0;">
+                        <img src="{{ s.imagen_url }}" alt="" style="width:100%; height:100%; object-fit:cover;">
+                    </div>
+                    <div>
+                        <p style="font-weight:700; font-size:12px; margin:0; color:#fff; text-transform:uppercase;">{{ s.nombre }}</p>
+                        <span style="font-size:11px; color:#888;">$ {{ s.precio|cop }} COP</span>
+                    </div>
+                </div>
+                <a href="{% url 'producto' s.id %}" class="btn-add-cross">ELEGIR TALLA →</a>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+
+<script src="{% static 'js/checkout.js' %}"></script>
+</body>
+</html>
