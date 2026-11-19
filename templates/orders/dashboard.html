@@ -1,0 +1,36 @@
+{% extends "base_store.html" %}
+{% load stateless %}
+{% block title %}Panel de control — STATELESS{% endblock %}
+{% block content %}
+<main class="container py-5">
+    <h1 class="mb-4">Panel de control</h1>
+    <div class="row g-3 mb-5">
+        <div class="col-md-3"><div class="border border-secondary p-3">Pedidos<strong class="d-block h3">{{ totals.orders }}</strong></div></div>
+        <div class="col-md-3"><div class="border border-secondary p-3">Pendientes de pago<strong class="d-block h3">{{ totals.pending }}</strong></div></div>
+        <div class="col-md-3"><div class="border border-secondary p-3">Pagados<strong class="d-block h3">{{ totals.confirmed }}</strong></div></div>
+        <div class="col-md-3"><div class="border border-secondary p-3">Ingresos confirmados<strong class="d-block h3">${{ totals.revenue|cop }} COP</strong></div></div>
+    </div>
+    <h2 class="h4">Pedidos recientes</h2>
+    <div class="table-responsive">
+        <table class="table table-dark table-hover">
+            <thead><tr><th>Pedido</th><th>Cliente</th><th>Estado</th><th>Total</th><th></th></tr></thead>
+            <tbody>
+            {% for order in orders %}
+                <tr>
+                    <td>{{ order.numero_factura }}</td>
+                    <td>{{ order.usuario.email }}</td>
+                    <td>{{ order.get_estado_display }}</td>
+                    <td>${{ order.total|cop }} COP</td>
+                    <td><a href="{% url 'order_detail' order.id %}">Ver</a></td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="5">Todavía no hay pedidos.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if user.is_staff %}
+        <a class="btn btn-outline-light" href="{% url 'admin:index' %}">Abrir administración</a>
+    {% endif %}
+</main>
+{% endblock %}

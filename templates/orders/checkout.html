@@ -1,0 +1,39 @@
+{% extends "base_store.html" %}
+{% load stateless %}
+{% block title %}Finalizar compra — STATELESS{% endblock %}
+{% block content %}
+<main class="container py-5">
+    <h1 class="mb-4">Finalizar compra</h1>
+    <div class="row g-5">
+        <section class="col-lg-7">
+            <h2 class="h4 mb-3">Datos de envío</h2>
+            <form method="post">
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                {% endif %}
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                    </div>
+                {% endfor %}
+                <button class="btn btn-light" type="submit">Crear pedido y continuar</button>
+            </form>
+        </section>
+        <aside class="col-lg-5">
+            <h2 class="h4 mb-3">Tu pedido</h2>
+            {% for item in items %}
+                <div class="d-flex justify-content-between border-bottom border-secondary py-2">
+                    <span>{{ item.producto.nombre }} × {{ item.cantidad }}</span>
+                    <strong>${{ item.subtotal|cop }}</strong>
+                </div>
+            {% endfor %}
+            <p class="d-flex justify-content-between mt-3">
+                <span>Total</span><strong>${{ total|cop }} COP</strong>
+            </p>
+        </aside>
+    </div>
+</main>
+{% endblock %}

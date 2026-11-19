@@ -93,3 +93,23 @@ class DemoTests(TestCase):
         call_command("cargar_demo", stdout=StringIO())
         self.assertEqual(Producto.objects.count(), 7)
         self.assertEqual(Proveedor.objects.count(), 1)
+
+
+class StorefrontViewTests(TestCase):
+    def test_home_and_collection_link_to_product_detail(self):
+        producto = crear_producto(nombre="Camiseta destacada")
+
+        home = self.client.get("/")
+        collection = self.client.get("/essentials")
+        detail = self.client.get(f"/producto/{producto.pk}")
+
+        self.assertEqual(home.status_code, 200)
+        self.assertContains(home, "Camiseta destacada")
+        self.assertEqual(collection.status_code, 200)
+        self.assertContains(collection, f"/producto/{producto.pk}")
+        self.assertEqual(detail.status_code, 200)
+        self.assertContains(detail, "Agregar al carrito")
+
+    def test_unknown_collection_returns_not_found(self):
+        response = self.client.get("/coleccion-inexistente")
+        self.assertEqual(response.status_code, 404)

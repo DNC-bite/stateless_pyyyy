@@ -1,6 +1,13 @@
 from django.shortcuts import render
 
+from apps.catalog.models import Producto
+
 
 def home(request):
-    # Provisional: la portada real (carrusel y Essentials) llega con el catálogo en la parte 3.
-    return render(request, "home.html")
+    productos = (
+        Producto.objects.activos()
+        .con_stock_total()
+        .select_related("categoria")
+        .prefetch_related("variantes")[:8]
+    )
+    return render(request, "home.html", {"productos": productos})

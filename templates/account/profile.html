@@ -25,9 +25,9 @@
 
     <div class="profile-nav">
         <a href="{% url 'perfil' %}" class="profile-nav-link active">Información Personal</a>
-        <a href="/account/orders" class="profile-nav-link">Mis Pedidos</a>
+        <a href="{% url 'orders_list' %}" class="profile-nav-link">Mis Pedidos</a>
         {% if user.es_personal %}
-        <a href="/admin/dashboard" class="profile-nav-link" style="color:#CA0080;">⚡ Panel Admin</a>
+        <a href="{% url 'dashboard' %}" class="profile-nav-link" style="color:#CA0080;">⚡ Panel Admin</a>
         {% endif %}
     </div>
 

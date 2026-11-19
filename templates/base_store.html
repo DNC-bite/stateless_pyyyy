@@ -14,16 +14,15 @@
     <nav class="navbar-stateless">
         <a href="{% url 'home' %}" class="brand">STATELESS</a>
 
-        {# Las rutas de la tienda se completan en la parte 3 (catálogo y carrito). #}
         <ul class="nav-links">
             <li><a href="{% url 'home' %}">INICIO</a></li>
-            <li><a href="/essentials">ESSENTIALS</a></li>
-            <li><a href="/waves">WAVES</a></li>
-            <li><a href="/octane">OCTANE</a></li>
+            <li><a href="{% url 'coleccion' 'essentials' %}">ESSENTIALS</a></li>
+            <li><a href="{% url 'coleccion' 'waves' %}">WAVES</a></li>
+            <li><a href="{% url 'coleccion' 'octane' %}">OCTANE</a></li>
         </ul>
 
         <div class="nav-right">
-            <a href="/carrito">CARRITO <span class="cart-badge">{{ cart_count|default:0 }}</span></a>
+            <a href="{% url 'carrito' %}">CARRITO <span class="cart-badge">{{ cart_count|default:0 }}</span></a>
             {% if user.is_authenticated %}
                 <a href="{% url 'cuenta' %}">MI CUENTA</a>
             {% else %}

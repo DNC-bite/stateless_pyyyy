@@ -1,0 +1,27 @@
+{% extends "base_store.html" %}
+{% load static %}
+{% block title %}{{ categoria.nombre }} — STATELESS{% endblock %}
+{% block content %}
+<main class="container py-5">
+    <header class="mb-5">
+        <p class="small text-secondary text-uppercase mb-1">Colección</p>
+        <h1>{{ categoria.nombre }}</h1>
+        {% if categoria.descripcion %}<p class="text-secondary">{{ categoria.descripcion }}</p>{% endif %}
+    </header>
+    <div class="row g-4">
+        {% for producto in productos %}
+        <div class="col-6 col-lg-3">
+            <a class="text-decoration-none text-light" href="{% url 'producto' producto.id %}">
+                <img class="w-100 mb-3" src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" loading="lazy"
+                     style="aspect-ratio:3/4;object-fit:cover;background:#171717"
+                     onerror="this.onerror=null;this.src='{% static 'images/placeholder.svg' %}'">
+                <h2 class="h6">{{ producto.nombre }}</h2>
+                <p class="text-secondary mb-0">${{ producto.precio|floatformat:0 }}</p>
+            </a>
+        </div>
+        {% empty %}
+        <div class="col-12"><p class="text-secondary">Esta colección aún no tiene productos disponibles.</p></div>
+        {% endfor %}
+    </div>
+</main>
+{% endblock %}

@@ -51,12 +51,14 @@ INSTALLED_APPS = [
     "allauth.account",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
+    "rest_framework",
     # Apps del proyecto
     "apps.core",
     "apps.accounts",
     "apps.catalog",
     "apps.cart",
     "apps.orders",
+    "apps.payments",
     "apps.reports",
     "apps.dashboard",
     "apps.player",
@@ -142,8 +144,7 @@ AUTHENTICATION_BACKENDS = ["apps.accounts.backends.EmailBackend"]
 LOGIN_URL = "/login"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/login"
-# A dónde va cada quien tras iniciar sesión (sin ?next=). Se cambian a "/checkout" y
-# "/admin/dashboard" cuando esas pantallas existen (partes 3 y 6).
+# A dónde va cada quien tras iniciar sesión cuando no se solicita una página concreta.
 LOGIN_DESTINO_CLIENTE = "/account"
 LOGIN_DESTINO_PERSONAL = "/account"
 
@@ -197,8 +198,9 @@ EMPRESA_CIUDAD = os.getenv("EMPRESA_CIUDAD", "Bogotá D.C., Colombia")
 EMPRESA_CORREO_SOPORTE = os.getenv("EMPRESA_CORREO_SOPORTE", "stateless2000@gmail.com")
 IVA_PORCENTAJE = 19  # los precios ya incluyen IVA; la base se calcula total / 1.19
 
-# Mientras no haya pasarela de pago real, el checkout es una simulación.
-MODO_DEMO_PAGOS = env_bool("MODO_DEMO_PAGOS", True)
+MERCADOPAGO_ACCESS_TOKEN = os.getenv("MERCADOPAGO_ACCESS_TOKEN", "")
+MERCADOPAGO_WEBHOOK_SECRET = os.getenv("MERCADOPAGO_WEBHOOK_SECRET", "")
+MERCADOPAGO_PUBLIC_URL = os.getenv("MERCADOPAGO_PUBLIC_URL", BASE_URL).rstrip("/")
 
 # --------------------------------------------------------------------------
 # Correo

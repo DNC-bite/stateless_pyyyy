@@ -1,10 +1,38 @@
 {% extends "base_store.html" %}
+{% load static %}
 {% block content %}
-<section style="background:#000; color:#fff; min-height:70vh; display:flex; align-items:center; justify-content:center; text-align:center; padding:60px 24px;">
-    <div>
-        <p style="font-size:11px; letter-spacing:6px; text-transform:uppercase; color:rgba(255,255,255,0.5); margin-bottom:20px;">Nueva Colección 2026</p>
-        <h1 style="font-family:'Bebas Neue', sans-serif; font-size:clamp(60px, 12vw, 130px); letter-spacing:10px; line-height:0.9; margin-bottom:16px;">STATELESS</h1>
-        <p style="font-size:12px; letter-spacing:4px; text-transform:uppercase; color:rgba(255,255,255,0.6);">Define tu mundo. Sin etiquetas.</p>
+<section class="text-center py-5 px-3" style="background:#000; color:#fff; min-height:50vh; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+    <p class="small text-uppercase text-secondary mb-3">Nueva colección 2026</p>
+    <h1 style="font-family:'Bebas Neue',sans-serif; font-size:clamp(60px,12vw,130px); letter-spacing:10px; line-height:.9;">STATELESS</h1>
+    <p class="small text-uppercase text-secondary mt-3">Define tu mundo. Sin etiquetas.</p>
+    <a class="btn btn-light mt-3" href="{% url 'coleccion' 'essentials' %}">Explorar colección</a>
+</section>
+
+<section class="container py-5">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <p class="small text-secondary text-uppercase mb-1">Descubre</p>
+            <h2 class="h3 mb-0">Productos destacados</h2>
+        </div>
+        <a class="link-light" href="{% url 'coleccion' 'essentials' %}">Ver colección</a>
+    </div>
+
+    <div class="row g-4">
+        {% for producto in productos %}
+        <div class="col-6 col-lg-3">
+            <a class="text-decoration-none text-light" href="{% url 'producto' producto.id %}">
+                <img class="w-100 mb-3" src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" loading="lazy"
+                     style="aspect-ratio:3/4;object-fit:cover;background:#171717"
+                     onerror="this.onerror=null;this.src='{% static 'images/placeholder.svg' %}'">
+                <h3 class="h6">{{ producto.nombre }}</h3>
+                <p class="text-secondary">${{ producto.precio|floatformat:0 }}</p>
+            </a>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <p class="text-secondary">Aún no hay productos publicados. Vuelve pronto para ver la colección.</p>
+        </div>
+        {% endfor %}
     </div>
 </section>
 {% endblock %}

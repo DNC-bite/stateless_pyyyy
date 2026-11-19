@@ -16,7 +16,7 @@
         </a>
 
         {% if user.es_cliente %}
-        <a href="/account/pedidos" style="text-decoration:none; color:#fff;">
+        <a href="{% url 'pedidos' %}" style="text-decoration:none; color:#fff;">
             <div style="border:1px solid #333; padding:30px; background: #111; transition: 0.3s;" onmouseover="this.style.borderColor='#fff'" onmouseout="this.style.borderColor='#333'">
                 <p style="font-size:10px; opacity:0.4; letter-spacing:2px; margin-bottom:10px;">COMPRAS</p>
                 <h3 style="font-family:'Bebas Neue'; letter-spacing:2px;">MIS PEDIDOS</h3>
@@ -25,7 +25,7 @@
         {% endif %}
 
         {% if user.es_personal %}
-        <a href="/admin/dashboard" style="text-decoration:none; color:#000;">
+        <a href="{% url 'dashboard' %}" style="text-decoration:none; color:#000;">
             <div style="border:1px solid #fff; padding:30px; background: #fff; transition: 0.3s;">
                 <p style="font-size:10px; opacity:0.6; letter-spacing:2px; margin-bottom:10px;">GESTIÓN</p>
                 <h3 style="font-family:'Bebas Neue'; letter-spacing:2px;">PANEL DE CONTROL</h3>
