@@ -51,7 +51,7 @@ def create_preference(payment):
     }
     if front.startswith("https://"):
         preference_data["auto_return"] = "approved"
-    if payment.payer_email:
+    if not settings.DEBUG and payment.payer_email:
         preference_data["payer"] = {"email": payment.payer_email}
 
     result = get_sdk().preference().create(preference_data)
@@ -75,19 +75,48 @@ def create_preference(payment):
 
 def create_payment_preference(venta):
     payment = Payment.objects.filter(venta=venta).first()
-    if payment and payment.preference_id:
+    replace_sandbox_preference = bool(
+        payment
+        and payment.preference_id
+        and settings.DEBUG
+        and payment.payer_email
+    )
+    if payment and payment.preference_id and not replace_sandbox_preference:
         return payment, False
+    if replace_sandbox_preference:
+        if payment.status != Payment.Status.PENDING or payment.mp_payment_id:
+            raise MercadoPagoError(
+                "Este pago ya fue iniciado y no se puede cambiar de comprador. Crea un pedido nuevo."
+            )
+        payment.preference_id = ""
+        payment.init_point = ""
+        payment.sandbox_init_point = ""
+        payment.payment_method = ""
+        payment.raw_response = {}
+
     if payment is None:
         payment = Payment.objects.create(
             venta=venta,
             title=f"Pedido {venta.numero_factura}",
             description=f"Compra STATELESS {venta.numero_factura}",
             unit_price=venta.total,
-            payer_email=venta.usuario.email,
+            payer_email="" if settings.DEBUG else venta.usuario.email,
         )
     else:
+        payment.payer_email = "" if settings.DEBUG else payment.payer_email or venta.usuario.email
         payment.status = Payment.Status.PENDING
-        payment.save(update_fields=["status", "updated_at"])
+        payment.status_detail = ""
+        payment.save(update_fields=[
+            "preference_id",
+            "init_point",
+            "sandbox_init_point",
+            "payment_method",
+            "raw_response",
+            "payer_email",
+            "status",
+            "status_detail",
+            "updated_at",
+        ])
 
     try:
         create_preference(payment)

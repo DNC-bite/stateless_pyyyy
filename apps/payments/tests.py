@@ -35,6 +35,7 @@ class PaymentApiTests(TestCase):
             get_sdk()
         sdk_cls.assert_not_called()
 
+    @override_settings(DEBUG=True)
     @patch("apps.payments.services.mercadopago.SDK")
     def test_create_payment_uses_sale_total_from_database(self, sdk_cls):
         sdk = MagicMock()
@@ -61,6 +62,58 @@ class PaymentApiTests(TestCase):
         sent = sdk.preference.return_value.create.call_args[0][0]
         self.assertEqual(sent["items"][0]["unit_price"], 50000.0)
         self.assertEqual(sent["external_reference"], response.data["reference"])
+        self.assertNotIn("payer", sent)
+
+    @override_settings(DEBUG=True)
+    @patch("apps.payments.services.mercadopago.SDK")
+    def test_sandbox_recreates_preference_without_fixed_payer(self, sdk_cls):
+        Payment.objects.create(
+            venta=self.venta,
+            title=self.venta.numero_factura,
+            unit_price=self.venta.total,
+            payer_email=self.user.email,
+            preference_id="pref-with-fixed-payer",
+            init_point="https://mp/pay",
+            sandbox_init_point="https://mp/old-sandbox-pay",
+        )
+        sdk = MagicMock()
+        sdk.preference.return_value.create.return_value = {
+            "status": 201,
+            "response": {
+                "id": "pref-any-test-buyer",
+                "init_point": "https://mp/pay",
+                "sandbox_init_point": "https://mp/sandbox-pay",
+            },
+        }
+        sdk_cls.return_value = sdk
+
+        response = self.client.post("/api/payments/", {"venta_id": self.venta.pk}, format="json")
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data["preference_id"], "pref-any-test-buyer")
+        self.assertEqual(response.data["payer_email"], "")
+        sent = sdk.preference.return_value.create.call_args[0][0]
+        self.assertNotIn("payer", sent)
+        sdk.preference.return_value.create.assert_called_once()
+
+    @override_settings(DEBUG=False)
+    @patch("apps.payments.services.mercadopago.SDK")
+    def test_production_preloads_payer_email(self, sdk_cls):
+        sdk = MagicMock()
+        sdk.preference.return_value.create.return_value = {
+            "status": 201,
+            "response": {
+                "id": "pref-production",
+                "init_point": "https://mp/pay",
+            },
+        }
+        sdk_cls.return_value = sdk
+
+        response = self.client.post("/api/payments/", {"venta_id": self.venta.pk}, format="json")
+
+        self.assertEqual(response.status_code, 201)
+        sent = sdk.preference.return_value.create.call_args[0][0]
+        self.assertEqual(sent["payer"]["email"], self.user.email)
 
     @patch("apps.payments.services.mercadopago.SDK")
     def test_repeated_create_reuses_existing_preference(self, sdk_cls):

@@ -190,3 +190,27 @@ class StoreOrderViewTests(TestCase):
             "https://mercadopago.example/sandbox",
             fetch_redirect_response=False,
         )
+
+    @override_settings(DEBUG=True)
+    @patch("apps.orders.views.payment_services.create_payment_preference")
+    def test_pay_order_does_not_fallback_to_live_url_without_sandbox(self, create_preference):
+        sale = Venta.objects.create(
+            usuario=self.user,
+            metodo_pago=Venta.Metodo.MERCADO_PAGO,
+            total="50000.00",
+        )
+        create_preference.return_value = (
+            SimpleNamespace(
+                init_point="https://mercadopago.example/live",
+                sandbox_init_point="",
+            ),
+            True,
+        )
+
+        response = self.client.post(f"/account/pedidos/{sale.pk}/pagar")
+
+        self.assertRedirects(
+            response,
+            f"/account/pedidos/{sale.pk}",
+            fetch_redirect_response=False,
+        )

@@ -168,11 +168,7 @@ def pagar_pedido(request, order_id):
         messages.error(request, str(error))
         return redirect("pedido_detalle", order_id=order.pk)
 
-    destination = (
-        payment.sandbox_init_point
-        if settings.DEBUG and payment.sandbox_init_point
-        else payment.init_point
-    )
+    destination = payment.sandbox_init_point if settings.DEBUG else payment.init_point
     if not destination:
         messages.error(request, "Mercado Pago no devolvió el enlace para pagar. Inténtalo más tarde.")
         return redirect("pedido_detalle", order_id=order.pk)

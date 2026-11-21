@@ -21,6 +21,9 @@ la API autenticada `POST /api/payments/` (JSON `{"venta_id": 123}`); consulta el
 El webhook confirma la venta solo después de consultar el pago real y verificar monto y moneda. Sin
 `MERCADOPAGO_ACCESS_TOKEN`, puedes navegar y crear pedidos, pero no iniciar el pago.
 
+En desarrollo no se fija el correo del pagador en la preferencia, para que se pueda ingresar con un comprador
+de prueba de Mercado Pago distinto de la cuenta vendedora.
+
 Pruebas de pagos (desde la carpeta exterior): `& .\.venv\Scripts\python.exe .\stateless_pyyyy-main\manage.py test apps.payments`.
 
 ## 1. Base de datos
