@@ -6,6 +6,10 @@ app_name = "dashboard"
 
 urlpatterns = [
     path("dashboard", views.inicio, name="inicio"),
+    path("asistente", views.asistente, name="asistente"),
+    path("asistente/preguntar", views.asistente_preguntar, name="asistente_preguntar"),
+    path("reclamos", views.reclamos, name="reclamos"),
+    path("reclamos/<int:pk>/actualizar", views.reclamo_actualizar, name="reclamo_actualizar"),
     path("ventas", views.ventas, name="ventas"),
     path("ventas/<int:pk>", views.venta_detalle, name="venta_detalle"),
     path("ventas/<int:pk>/estado", views.venta_estado, name="venta_estado"),

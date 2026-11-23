@@ -17,7 +17,7 @@
             {% elif field.name == 'modelo_3d_archivo' %}
                 <div class="form-field field-wide">
                     {{ field.label_tag }}{{ field }}{{ field.errors }}
-                    <small>Sube un archivo .glb de hasta 50 MB. La opción de vista 3D solo aparecerá en este producto.</small>
+                    <small>Sube un archivo .glb de hasta 150 MB. La opción de vista 3D solo aparecerá en este producto.</small>
                     {% if producto.modelo_3d %}<small>Modelo actual: <a href="{{ producto.modelo_3d }}" target="_blank" rel="noopener">abrir archivo</a></small>{% endif %}
                 </div>
             {% elif field.name == 'modelo_3d_eliminar' %}

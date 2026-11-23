@@ -35,3 +35,18 @@
 .btn-carrito[disabled] { background: #333; color: #888; cursor: not-allowed; }
 .talla-alert { display: none; color: #ff4444; font-size: 12px; margin-top: 10px; font-weight: 600; }
 @media (max-width: 900px) { .producto-page { padding: 40px 20px; } .producto-grid { grid-template-columns: 1fr; gap: 30px; } .producto-img img { height: 420px; } }
+
+.ai-style-box { border: 1px solid #333; display: grid; gap: 18px; margin-top: 40px; padding: 24px; }
+.ai-style-box h2 { font-size: 24px; margin: 0 0 8px; }
+.ai-style-box p { line-height: 1.6; margin: 0; opacity: .7; }
+.ai-style-box form label { display: block; font-size: 12px; margin-bottom: 8px; }
+.ai-style-box form label span { opacity: .55; }
+.ai-style-controls { display: flex; gap: 8px; }
+.ai-style-controls input { background: #111; border: 1px solid #444; color: #fff; flex: 1; min-width: 0; padding: 12px; }
+.ai-style-controls button { background: #fff; border: 0; color: #000; cursor: pointer; font-weight: 700; padding: 0 18px; }
+.ai-style-controls button:disabled { cursor: wait; opacity: .5; }
+.ai-style-results { display: grid; gap: 10px; }
+.ai-style-results article { border-top: 1px solid #333; padding-top: 12px; }
+.ai-style-results a { font-weight: 700; }
+.ai-style-results p { font-size: 13px; margin-top: 5px; }
+@media (max-width: 600px) { .ai-style-box { padding: 16px; } .ai-style-controls { flex-direction: column; } .ai-style-controls button { min-height: 44px; } }

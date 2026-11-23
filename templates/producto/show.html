@@ -73,9 +73,26 @@
         <p id="talla-alert" class="talla-alert">⚠️ Por favor selecciona una talla antes de añadir al carrito.</p>
     </div>
 </div>
+<section class="ai-style-box" aria-labelledby="ai-style-title">
+    <div>
+        <p class="producto-cat">ASESOR DE ESTILO LOCAL</p>
+        <h2 id="ai-style-title">Combina esta prenda con IA</h2>
+        <p>Recibe ideas con prendas activas y disponibles de STATELESS. Tu consulta se procesa en el servidor local.</p>
+    </div>
+    <form id="ai-style-form" action="{% url 'recomendar_prendas' producto.id %}" method="post">
+        {% csrf_token %}
+        <label for="ai-style-request">¿Qué estilo o color buscas? <span>(opcional)</span></label>
+        <div class="ai-style-controls">
+            <input id="ai-style-request" name="request" maxlength="500" placeholder="Ej.: un look casual para clima frío">
+            <button type="submit">Recomendar</button>
+        </div>
+    </form>
+    <div id="ai-style-results" class="ai-style-results" aria-live="polite"></div>
+</section>
 </section>
 {% endblock %}
 {% block extra_js %}
 {% if producto.modelo_3d %}<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.1.0/model-viewer.min.js"></script>{% endif %}
 <script src="{% static 'js/product.js' %}"></script>
+<script src="{% static 'js/product-ai.js' %}"></script>
 {% endblock %}

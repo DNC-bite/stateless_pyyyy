@@ -280,6 +280,21 @@ class GarantiaClienteTests(TestCase):
         self.assertContains(r, f"Tu solicitud de garantía #{g.id} para la prenda &#x27;Camisa Octane&#x27; fue radicada")
         self.assertContains(r, f"#GAR-{g.id}")
 
+    def test_radicar_queja_general_sin_pedido(self):
+        response = self.c.post(
+            "/account/garantias/radicar",
+            {
+                "tipoIncidencia": GarantiaReclamo.Tipo.QUEJA_GENERAL,
+                "descripcion": "Quiero reportar un problema con mi experiencia de compra.",
+            },
+            follow=True,
+        )
+        reclamo = GarantiaReclamo.objects.get()
+        self.assertIsNone(reclamo.venta)
+        self.assertIsNone(reclamo.producto)
+        self.assertIsNone(reclamo.proveedor)
+        self.assertContains(response, f"Tu solicitud #{reclamo.pk} fue radicada")
+
     def test_no_se_puede_reclamar_sobre_el_pedido_de_otra_persona(self):
         otro = cliente("otro@correo.com")
         ajeno = pedido(otro, p=producto("Ajena"))

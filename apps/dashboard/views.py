@@ -2,26 +2,32 @@ from datetime import timedelta
 from functools import wraps
 from io import BytesIO
 from decimal import Decimal
+import json
+import logging
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, Sum
 from django.db.models.functions import TruncDate
 from django.db.models.deletion import ProtectedError
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-from django.views.decorators.http import require_POST
+from django.views.decorators.cache import never_cache
+from django.views.decorators.http import require_GET, require_POST
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill
 
 from apps.accounts.models import Role
 from apps.catalog.models import Categoria, Producto, Proveedor
+from apps.core import ratelimit
+from apps.core.ai import IAError, responder_ollama
 from apps.core.utils import desglose_iva
 from apps.orders import services as pedidos_services
-from apps.orders.models import Envio, Venta
+from apps.orders.models import Envio, GarantiaReclamo, Venta, VentaItem
 
 from .forms import (
     CategoriaForm,
@@ -30,12 +36,14 @@ from .forms import (
     ProductoImagenFormSet,
     ProductoVarianteFormSet,
     ProveedorForm,
+    ReclamoAdminForm,
     ReporteFiltroForm,
     UsuarioForm,
     VentaEstadoForm,
 )
 
 User = get_user_model()
+log = logging.getLogger(__name__)
 ESTADOS_CERRADOS = (Venta.Estado.CANCELADO, Venta.Estado.PENDIENTE_PAGO)
 
 
@@ -91,6 +99,201 @@ def inicio(request):
         "gradiente_metodos": f"conic-gradient({', '.join(partes)})" if partes else "#ddd",
         "ventas_recientes": Venta.objects.select_related("usuario").order_by("-created_at")[:6],
     })
+
+
+def _datos_panel_para_ia():
+    """Contexto vigente, acotado y sin datos identificables para el modelo local."""
+    ventas_pagadas = Venta.objects.exclude(estado__in=ESTADOS_CERRADOS)
+    resumen_ventas = ventas_pagadas.aggregate(cantidad=Count("id"), total=Sum("total"))
+    hoy = timezone.localdate()
+    ventas_diarias = list(
+        ventas_pagadas.filter(created_at__date__gte=hoy - timedelta(days=29), created_at__date__lte=hoy)
+        .annotate(dia=TruncDate("created_at"))
+        .values("dia")
+        .annotate(cantidad=Count("id"), total=Sum("total"))
+        .order_by("dia")
+    )
+    productos = list(
+        Producto.objects.con_stock_total()
+        .select_related("categoria")
+        .order_by("nombre")[:200]
+    )
+    ventas_recientes = list(
+        Venta.objects.order_by("-created_at", "-id")
+        .values("id", "created_at", "estado", "total")[:30]
+    )
+    reclamos = list(
+        GarantiaReclamo.objects.order_by("-created_at", "-id")
+        .values("id", "created_at", "tipo_incidencia", "estado", "venta_id", "producto__nombre")[:30]
+    )
+    ventas_por_estado = list(
+        Venta.objects.values("estado").annotate(cantidad=Count("id"), total=Sum("total")).order_by("estado")
+    )
+    reclamos_por_estado = list(
+        GarantiaReclamo.objects.values("estado").annotate(cantidad=Count("id")).order_by("estado")
+    )
+    reclamos_por_tipo = list(
+        GarantiaReclamo.objects.values("tipo_incidencia").annotate(cantidad=Count("id")).order_by("tipo_incidencia")
+    )
+    productos_mas_vendidos = list(
+        VentaItem.objects.exclude(venta__estado__in=ESTADOS_CERRADOS)
+        .values("producto__nombre")
+        .annotate(unidades=Sum("cantidad"))
+        .order_by("-unidades", "producto__nombre")[:10]
+    )
+    inventario = [
+        {
+            "producto": producto.nombre,
+            "categoria": producto.categoria.nombre,
+            "estado": producto.estado,
+            "precio": str(producto.precio),
+            "stock": producto.stock_total,
+            "stock_minimo": producto.stock_minimo,
+        }
+        for producto in productos
+    ]
+    return {
+        "actualizado_en": timezone.localtime().isoformat(timespec="seconds"),
+        "clientes_registrados": User.objects.filter(role__name=Role.CLIENTE).count(),
+        "resumen_inventario": {
+            "productos_totales": Producto.objects.count(),
+            "productos_activos": Producto.objects.activos().count(),
+            "productos_con_stock_bajo": Producto.objects.stock_bajo().count(),
+            "productos_sin_stock": Producto.objects.sin_stock().count(),
+        },
+        "resumen_ventas_pagadas": {
+            "cantidad": resumen_ventas["cantidad"],
+            "total_cop": str(resumen_ventas["total"] or Decimal("0")),
+        },
+        "ventas_ultimos_30_dias": [
+            {"fecha": fila["dia"].isoformat(), "cantidad": fila["cantidad"], "total_cop": str(fila["total"] or 0)}
+            for fila in ventas_diarias
+        ],
+        "ventas_por_estado": [
+            {"estado": fila["estado"], "cantidad": fila["cantidad"], "total_cop": str(fila["total"] or 0)}
+            for fila in ventas_por_estado
+        ],
+        "productos_mas_vendidos": productos_mas_vendidos,
+        "inventario_hasta_200_productos": inventario,
+        "reclamos_por_estado": reclamos_por_estado,
+        "reclamos_por_tipo": reclamos_por_tipo,
+        "pedidos_recientes_hasta_30": [
+            {
+                "id": fila["id"],
+                "fecha": timezone.localtime(fila["created_at"]).isoformat(timespec="minutes"),
+                "estado": fila["estado"],
+                "total_cop": str(fila["total"]),
+            }
+            for fila in ventas_recientes
+        ],
+        "reclamos_recientes_hasta_30": [
+            {
+                "id": fila["id"],
+                "fecha": timezone.localtime(fila["created_at"]).isoformat(timespec="minutes"),
+                "tipo": fila["tipo_incidencia"],
+                "estado": fila["estado"],
+                "pedido_id": fila["venta_id"],
+                "producto": fila["producto__nombre"],
+            }
+            for fila in reclamos
+        ],
+    }
+
+
+@personal_required
+@never_cache
+@require_GET
+def asistente(request):
+    historial = request.session.get(f"asistente_admin_{request.user.pk}", [])
+    return render(request, "dashboard/asistente.html", {
+        "historial": historial,
+        "modelo_ia": settings.OLLAMA_MODEL,
+        "num_ctx": settings.OLLAMA_NUM_CTX,
+    })
+
+
+@personal_required
+@never_cache
+@require_POST
+def asistente_preguntar(request):
+    try:
+        datos = json.loads(request.body.decode("utf-8"))
+    except (ValueError, UnicodeDecodeError):
+        return JsonResponse({"error": "La solicitud debe contener JSON válido."}, status=400)
+    if not isinstance(datos, dict):
+        return JsonResponse({"error": "La solicitud debe contener una pregunta."}, status=400)
+    pregunta = datos.get("question")
+    if not isinstance(pregunta, str) or not pregunta.strip() or len(pregunta) > 1000:
+        return JsonResponse({"error": "Escribe una pregunta de hasta 1000 caracteres."}, status=400)
+    if not ratelimit.permitir(f"asistente-admin:{request.user.pk}", 30, 60 * 60):
+        return JsonResponse({"error": "Has enviado muchas preguntas. Inténtalo de nuevo más tarde."}, status=429)
+
+    clave_historial = f"asistente_admin_{request.user.pk}"
+    historial = request.session.get(clave_historial, [])[-5:]
+    contexto = _datos_panel_para_ia()
+    mensajes = [{
+        "role": "system",
+        "content": (
+            "Eres el asistente interno de STATELESS. Responde en español, de forma clara y concisa, "
+            "usando únicamente el contexto JSON más reciente que acompaña a cada pregunta. No inventes "
+            "cifras ni afirmes haber ejecutado cambios. Si falta un dato, dilo explícitamente. Solo tienes "
+            "acceso de lectura: nunca ejecutes ni propongas operaciones de escritura. El contexto no contiene "
+            "nombres, correos, direcciones ni descripciones privadas de clientes. La hora del contexto indica "
+            "cuándo se consultó la base de datos. Para presentar cantidades y dinero usa el formato de "
+            "Colombia: punto para miles y coma para decimales (por ejemplo, 1.234 y $1.234.567,50 COP). "
+            "Nunca uses coma como separador de miles."
+        ),
+    }]
+    for turno in historial:
+        mensajes.extend([
+            {"role": "user", "content": turno["question"]},
+            {"role": "assistant", "content": turno["answer"]},
+        ])
+    mensajes.append({
+        "role": "user",
+        "content": (
+            f"Pregunta: {pregunta.strip()}\n\n"
+            "Datos actuales consultados de la base de datos (JSON):\n"
+            f"{json.dumps(contexto, ensure_ascii=False)}"
+        ),
+    })
+    try:
+        respuesta = responder_ollama(mensajes)
+    except IAError as exc:
+        return JsonResponse({"error": str(exc)}, status=503)
+    historial.append({"question": pregunta.strip(), "answer": respuesta})
+    request.session[clave_historial] = historial[-5:]
+    return JsonResponse({"answer": respuesta, "updated_at": contexto["actualizado_en"]})
+
+
+@personal_required
+@never_cache
+@require_GET
+def reclamos(request):
+    pendientes = GarantiaReclamo.objects.filter(
+        estado__in=(GarantiaReclamo.Estado.RADICADO, GarantiaReclamo.Estado.EN_AUDITORIA)
+    ).count()
+    queryset = GarantiaReclamo.objects.select_related(
+        "usuario", "venta", "producto", "proveedor"
+    ).order_by("-created_at", "-id")
+    return render(request, "dashboard/reclamos.html", {
+        "reclamos": queryset,
+        "pendientes": pendientes,
+        "estados": GarantiaReclamo.Estado.choices,
+    })
+
+
+@personal_required
+@require_POST
+def reclamo_actualizar(request, pk):
+    reclamo = get_object_or_404(GarantiaReclamo, pk=pk)
+    form = ReclamoAdminForm(request.POST, instance=reclamo)
+    if form.is_valid():
+        form.save()
+        messages.success(request, f"Se actualizó el reclamo #{reclamo.pk}.")
+    else:
+        messages.error(request, "Revisa el estado y la respuesta del reclamo.")
+    return redirect("dashboard:reclamos")
 
 
 @personal_required

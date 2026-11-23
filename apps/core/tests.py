@@ -1,8 +1,12 @@
 from decimal import Decimal
+from unittest.mock import patch
 
 from django.template import Context, Template
 from django.test import SimpleTestCase, override_settings
 
+import requests
+
+from apps.core.ai import IAError, responder_ollama
 from apps.core.utils import desglose_iva, imagen_url
 
 
@@ -40,3 +44,11 @@ class RateLimitTests(SimpleTestCase):
         self.assertEqual([ratelimit.permitir("k", 2, 60) for _ in range(4)], [True, True, False, False])
         ratelimit.reiniciar("k")
         self.assertTrue(ratelimit.permitir("k", 2, 60))
+
+
+class OllamaTests(SimpleTestCase):
+    @override_settings(OLLAMA_TIMEOUT=120)
+    @patch("apps.core.ai.requests.post", side_effect=requests.Timeout)
+    def test_explica_el_timeout_del_modelo_local(self, _post):
+        with self.assertRaisesRegex(IAError, "más de 120 segundos"):
+            responder_ollama([{"role": "user", "content": "prueba"}])

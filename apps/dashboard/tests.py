@@ -1,8 +1,11 @@
 from io import BytesIO
 from pathlib import Path
+from types import SimpleNamespace
 from tempfile import TemporaryDirectory
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.test.utils import override_settings
@@ -10,7 +13,8 @@ from PIL import Image
 
 from apps.accounts.models import Role
 from apps.catalog.models import Categoria, Producto, ProductoImagen, ProductoVariante, Proveedor
-from apps.orders.models import Envio, Venta
+from apps.dashboard.forms import MAX_TAMANO_MODELO_3D, ProductoForm
+from apps.orders.models import Envio, GarantiaReclamo, Venta
 
 User = get_user_model()
 
@@ -44,6 +48,53 @@ class PanelAdminTests(TestCase):
     def test_solo_personal_puede_abrir_el_panel(self):
         self.client.force_login(self.cliente)
         self.assertEqual(self.client.get("/admin/dashboard").status_code, 403)
+        self.assertEqual(self.client.get("/admin/asistente").status_code, 403)
+        self.assertEqual(self.client.get("/admin/reclamos").status_code, 403)
+
+    @patch("apps.dashboard.views.responder_ollama", return_value="Hay un pedido confirmado.")
+    def test_asistente_consulta_datos_actuales_sin_datos_personales(self, responder):
+        response = self.client.post(
+            "/admin/asistente/preguntar",
+            data='{"question":"¿Cuántas ventas hay?"}',
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["answer"], "Hay un pedido confirmado.")
+        prompt = responder.call_args[0][0][-1]["content"]
+        self.assertIn("resumen_ventas_pagadas", prompt)
+        self.assertIn("Camiseta", prompt)
+        instrucciones = responder.call_args[0][0][0]["content"]
+        self.assertIn("punto para miles y coma para decimales", instrucciones)
+        self.assertIn("Nunca uses coma como separador de miles", instrucciones)
+        self.assertNotIn(self.cliente.email, prompt)
+        self.assertNotIn(self.cliente.name, prompt)
+
+    def test_asistente_rechaza_pregunta_invalida(self):
+        response = self.client.post(
+            "/admin/asistente/preguntar",
+            data='{"question":" "}',
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_personal_gestiona_y_responde_reclamos(self):
+        reclamo = GarantiaReclamo.objects.create(
+            usuario=self.cliente, venta=self.venta, producto=self.producto,
+            tipo_incidencia=GarantiaReclamo.Tipo.PRENDA_DANADA,
+            descripcion_cliente="La tela llegó rasgada.",
+        )
+        self.assertContains(self.client.get("/admin/reclamos"), "La tela llegó rasgada.")
+        response = self.client.post(
+            f"/admin/reclamos/{reclamo.pk}/actualizar",
+            {
+                "estado": GarantiaReclamo.Estado.EN_AUDITORIA,
+                "respuesta_admin": "Estamos revisando tu caso.",
+            },
+        )
+        self.assertRedirects(response, "/admin/reclamos", fetch_redirect_response=False)
+        reclamo.refresh_from_db()
+        self.assertEqual(reclamo.estado, GarantiaReclamo.Estado.EN_AUDITORIA)
+        self.assertEqual(reclamo.respuesta_admin, "Estamos revisando tu caso.")
 
     def test_cambios_de_venta_sincronizan_el_envio(self):
         response = self.client.post(
@@ -56,6 +107,15 @@ class PanelAdminTests(TestCase):
         self.assertEqual(self.venta.estado, Venta.Estado.EN_PREPARACION)
         self.assertEqual(self.envio.estado, Envio.Estado.PREPARANDO)
         self.assertIsNotNone(self.envio.fecha_preparando)
+
+    def test_modelo_3d_acepta_hasta_150_mb_y_rechaza_mas(self):
+        form = ProductoForm()
+        form.cleaned_data = {"modelo_3d_archivo": SimpleNamespace(size=MAX_TAMANO_MODELO_3D)}
+        self.assertIsNotNone(form.clean_modelo_3d_archivo())
+
+        form.cleaned_data["modelo_3d_archivo"].size += 1
+        with self.assertRaises(ValidationError):
+            form.clean_modelo_3d_archivo()
 
     def test_envio_en_camino_exige_transportadora_y_guia(self):
         response = self.client.post(
@@ -101,6 +161,8 @@ class PanelAdminTests(TestCase):
     def test_todas_las_vistas_principales_se_renderizan(self):
         rutas = (
             "/admin/dashboard",
+            "/admin/asistente",
+            "/admin/reclamos",
             "/admin/ventas",
             f"/admin/ventas/{self.venta.pk}",
             "/admin/usuarios",
