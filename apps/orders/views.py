@@ -156,31 +156,47 @@ def garantia_radicar_view(request):
     destino = redirect("pedidos_garantias")
     form = GarantiaForm(request.POST)
     if not form.is_valid():
-        errores_de_texto = [e for campo, lista in form.errors.items() if campo not in ("ventaId", "productoId") for e in lista]
+        errores_de_texto = [
+            error
+            for campo, lista in form.errors.items()
+            if campo not in ("ventaId", "productoId")
+            for error in lista
+        ]
         messages.error(request, errores_de_texto[0] if errores_de_texto else "Datos de pedido o prenda inválidos.")
         return destino
 
     datos = form.cleaned_data
-    venta = Venta.objects.filter(pk=datos["ventaId"], usuario=request.user).first()
-    item = venta and venta.items.filter(producto_id=datos["productoId"]).select_related("producto__proveedor").first()
-    if venta is None or item is None:  # el pedido no es suyo, o la prenda no está en ese pedido
-        messages.error(request, "Datos de pedido o prenda inválidos.")
-        return destino
-    if venta.cancelada:
-        messages.error(request, "Ese pedido está cancelado, así que no admite reclamos.")
-        return destino
+    venta, item = None, None
+    if datos["tipoIncidencia"] != GarantiaReclamo.Tipo.QUEJA_GENERAL:
+        venta = Venta.objects.filter(pk=datos["ventaId"], usuario=request.user).first()
+        item = (
+            venta.items.filter(producto_id=datos["productoId"])
+            .select_related("producto__proveedor")
+            .first()
+            if venta and datos["productoId"]
+            else None
+        )
+        if venta is None or item is None:
+            messages.error(request, "Datos de pedido o prenda inválidos.")
+            return destino
+        if venta.cancelada:
+            messages.error(request, "Ese pedido está cancelado, así que no admite reclamos.")
+            return destino
     if not ratelimit.permitir(f"garantia:{request.user.pk}", 10, 60 * 60):
         messages.error(request, "Has enviado muchos reclamos seguidos. Inténtalo de nuevo más tarde.")
         return destino
 
     reclamo = GarantiaReclamo.objects.create(
-        usuario=request.user, venta=venta, producto=item.producto, proveedor=item.producto.proveedor,
+        usuario=request.user, venta=venta, producto=item.producto if item else None,
+        proveedor=item.producto.proveedor if item else None,
         tipo_incidencia=datos["tipoIncidencia"], descripcion_cliente=datos["descripcion"],
         estado=GarantiaReclamo.Estado.RADICADO,
     )
-    messages.success(
-        request,
-        f"Tu solicitud de garantía #{reclamo.id} para la prenda '{item.producto.nombre}' fue radicada. "
-        "Nuestro equipo de control de calidad y el proveedor textil asignado la están evaluando.",
-    )
+    mensaje = f"Tu solicitud #{reclamo.id} fue radicada y ya está disponible para nuestro equipo."
+    if item:
+        mensaje = (
+            f"Tu solicitud de garantía #{reclamo.id} para la prenda '{item.producto.nombre}' fue radicada. "
+            "Nuestro equipo de control de calidad y el proveedor textil asignado la están evaluando."
+        )
+    messages.success(request, mensaje)
     return destino

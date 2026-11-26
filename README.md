@@ -22,10 +22,24 @@ Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
 Después, **uno por uno** (no pegues el bloque entero):
 
 ```powershell
+git clone <URL_DEL_REPOSITORIO>   # solo si todavía no has clonado el proyecto
+cd <CARPETA_DEL_REPOSITORIO>
 python -m venv venv
 venv\Scripts\activate          # debe aparecer (venv) al inicio de la línea
 pip install -r requirements.txt
 copy .env.example .env         # y edítalo (ver sección 1)
+```
+
+`.env` es local y no se sube a Git. La plantilla usa SQLite y un modelo local liviano. Instala Ollama en el
+computador nuevo, abre una terminal y descarga el modelo configurado:
+
+```powershell
+ollama pull qwen2.5:1.5b
+```
+
+Después ejecuta:
+
+```powershell
 python manage.py migrate
 python manage.py crear_admin   # te pide tu correo real y tu contraseña
 python manage.py cargar_demo   # opcional: 7 productos de demostración
@@ -34,6 +48,7 @@ python manage.py runserver 8081
 ```
 
 Abre **http://127.0.0.1:8081** (usa siempre `127.0.0.1`, no `localhost`: Google y Spotify piden la dirección exacta).
+Si ya tenías una copia del repositorio en ese computador, en lugar de `git clone` ejecuta `git pull`.
 
 Si `pip install mysqlclient` falla en Windows, comenta esa línea de `requirements.txt` y descomenta `PyMySQL`.
 
@@ -47,7 +62,7 @@ Para registrar productos nuevos, abre `/admin/productos/nuevo` y arrastra una im
 (o selecciónala con un clic). La vista previa aparece antes de guardar; los archivos cargados se guardan en `media/productos/`
 y se muestran en la tienda. Las imágenes ya existentes en `static/images/` siguen admitiendo su nombre de archivo.
 De forma opcional, sube un modelo `.glb` en la edición de un producto: solo esa prenda mostrará el botón **Ver en 3D**.
-El visor permite girar y acercar el modelo; los archivos pueden pesar hasta 50 MB.
+El visor permite girar y acercar el modelo; los archivos pueden pesar hasta 150 MB.
 
 ## Parte 2: lo que ya funciona
 
@@ -98,6 +113,30 @@ si el NIT no es real, cambia el subtítulo (por ejemplo a "Documento de Venta").
 El panel `/admin/...` incluye inicio, ventas y cambios de estado, usuarios, logística, productos, proveedores,
 categorías y reportes financieros con exportación a Excel. El acceso está limitado al personal; los cambios
 de pedidos usan el servicio que sincroniza venta, envío y notificaciones.
+
+## IA local y atención al cliente
+
+La tienda incorpora recomendaciones de combinaciones en la ficha de cada producto y permite radicar quejas
+generales o garantías desde `/account/orders`. El personal revisa y responde las solicitudes en
+`/admin/reclamos`. El asistente `/admin/asistente` responde preguntas usando una consulta actualizada de
+solo lectura sobre ventas, pedidos, inventario y reclamos; por privacidad, omite nombres, correos, direcciones
+y descripciones privadas.
+
+Ambas funciones usan Ollama local y no envían preguntas ni datos a una API externa. Instala Ollama, descarga
+un modelo con capacidad de conversación (por ejemplo `ollama pull qwen2.5:14b`) y configura estas variables
+en `.env`:
+
+```env
+OLLAMA_URL=http://127.0.0.1:11434
+OLLAMA_MODEL=qwen2.5:14b
+OLLAMA_NUM_CTX=32768
+OLLAMA_TIMEOUT=120
+```
+
+`OLLAMA_NUM_CTX` define el máximo de contexto solicitado al modelo; el modelo y los recursos de la máquina
+deben soportar ese tamaño. El asistente administrativo consulta la base de datos en cada pregunta, pero solo
+expone agregados y listados acotados (hasta 200 productos, 30 pedidos y 30 reclamos recientes). Si Ollama no
+está disponible, la aplicación muestra un error y no sustituye la respuesta con información inventada.
 
 ## Si `migrate` dice "Can't connect to server" (error 10061)
 

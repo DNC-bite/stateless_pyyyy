@@ -16,6 +16,8 @@
         <nav class="admin-nav" aria-label="Administración">
             <a class="{% if request.resolver_match.url_name == 'inicio' %}active{% endif %}" href="{% url 'dashboard:inicio' %}">Inicio</a>
             <a class="{% if request.resolver_match.url_name == 'ventas' or request.resolver_match.url_name == 'venta_detalle' %}active{% endif %}" href="{% url 'dashboard:ventas' %}">Ventas</a>
+            <a class="{% if request.resolver_match.url_name == 'reclamos' or request.resolver_match.url_name == 'reclamo_actualizar' %}active{% endif %}" href="{% url 'dashboard:reclamos' %}">Quejas / Reclamos</a>
+            <a class="{% if request.resolver_match.url_name == 'asistente' %}active{% endif %}" href="{% url 'dashboard:asistente' %}">Asistente IA</a>
             <a class="{% if request.resolver_match.url_name == 'usuarios' or request.resolver_match.url_name == 'usuario_editar' %}active{% endif %}" href="{% url 'dashboard:usuarios' %}">Usuarios</a>
             <a class="{% if request.resolver_match.url_name == 'envios' %}active{% endif %}" href="{% url 'dashboard:envios' %}">Envíos</a>
             <a class="{% if request.resolver_match.url_name == 'productos' or request.resolver_match.url_name == 'producto_crear' or request.resolver_match.url_name == 'producto_editar' %}active{% endif %}" href="{% url 'dashboard:productos' %}">Productos</a>

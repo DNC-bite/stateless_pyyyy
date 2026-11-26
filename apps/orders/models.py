@@ -163,6 +163,7 @@ class GarantiaReclamo(models.Model):
         DEFECTO_TELA = "DEFECTO_TELA", "Defecto en Tela / Decoloración"
         TALLA_INCORRECTA = "TALLA_INCORRECTA", "Talla no corresponde a la etiqueta"
         CANCELACION = "CANCELACION_SOLICITADA", "Solicitud de Cancelación / Devolución"
+        QUEJA_GENERAL = "QUEJA_GENERAL", "Queja o reclamación general"
 
     class Estado(models.TextChoices):
         RADICADO = "RADICADO", "Radicado"
@@ -171,7 +172,9 @@ class GarantiaReclamo(models.Model):
         APROBADO = "APROBADO_GARANTIA", "Garantía aprobada"
         RECHAZADO = "RECHAZADO", "Rechazado"
 
-    venta = models.ForeignKey(Venta, on_delete=models.CASCADE, related_name="garantias")
+    venta = models.ForeignKey(
+        Venta, on_delete=models.CASCADE, related_name="garantias", null=True, blank=True
+    )
     producto = models.ForeignKey("catalog.Producto", on_delete=models.SET_NULL, null=True, blank=True)
     proveedor = models.ForeignKey("catalog.Proveedor", on_delete=models.SET_NULL, null=True, blank=True)
     usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="garantias")

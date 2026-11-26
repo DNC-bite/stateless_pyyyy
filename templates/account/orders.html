@@ -15,9 +15,12 @@
     <div class="topbar">
         <div>
             <h1 class="title">MIS COMPRAS & CENTRO DE GARANTÍAS</h1>
-            <p style="font-size: 12px; color: #777;">Historial de pedidos, facturas oficiales y reporte de quejas por prendas defectuosas</p>
+            <p style="font-size: 12px; color: #777;">Historial de pedidos, facturas, garantías y quejas</p>
         </div>
-        <a href="{% url 'home' %}" class="btn-link">← Volver a la Tienda</a>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <button type="button" class="btn-link" data-reportar-general>Presentar queja</button>
+            <a href="{% url 'home' %}" class="btn-link">← Volver a la Tienda</a>
+        </div>
     </div>
 
     {% for message in messages %}
@@ -58,36 +61,45 @@
     <div id="modalQueja" class="card modal-box" style="display: none;">
         <h2 class="card-header">Reportar Garantía / Queja por Prenda Defectuosa</h2>
         <p style="font-size: 12px; color: #aaa; margin-bottom: 14px;">
-            Si tu prenda tiene una costura rota, decoloración anormal o defecto de tela, indícanos los detalles para tramitar el cambio con el taller/proveedor textil.
+            Puedes radicar una queja general o asociar una garantía a un pedido y una prenda.
         </p>
 
         <form method="post" action="{% url 'garantia_radicar' %}">
             {% csrf_token %}
-            <input type="hidden" id="modalVentaId" name="ventaId">
+            <input type="hidden" id="modalProductoId" name="productoId">
 
             <div class="form-grid">
+                <div class="campo" id="solicitud-pedido-field">
+                    <label for="modalVentaId">Pedido relacionado</label>
+                    <select id="modalVentaId" name="ventaId" class="campo-input">
+                        <option value="">-- Selecciona un pedido --</option>
+                        {% for v in pedidos %}{% if not v.cancelada %}
+                        <option value="{{ v.id }}">Pedido #{{ v.id }} · {{ v.created_at|date:"d/m/Y" }}</option>
+                        {% endif %}{% endfor %}
+                    </select>
+                </div>
                 <div class="campo">
-                    <label for="selectTipo">Tipo de Falla</label>
+                    <label for="selectTipo">Tipo de solicitud</label>
                     <select id="selectTipo" name="tipoIncidencia" class="campo-input" required>
                         {% for valor, etiqueta in tipos %}<option value="{{ valor }}">{{ etiqueta }}</option>{% endfor %}
                     </select>
                 </div>
-                <div class="campo">
-                    <label for="selectPrenda">Prenda con Defecto</label>
-                    <select id="selectPrenda" name="productoId" class="campo-input" required>
-                        <option value="">-- Seleccionar Prenda con Defecto --</option>
+                <div class="campo" id="solicitud-prenda-field">
+                    <label for="selectPrenda">Prenda relacionada (si aplica)</label>
+                    <select id="selectPrenda" class="campo-input" disabled>
+                        <option value="">-- Selecciona una prenda de este pedido --</option>
                     </select>
                 </div>
             </div>
 
             <div class="campo" style="margin-bottom: 14px;">
-                <label for="descripcion">Describe detalladamente el daño</label>
+                <label for="descripcion">Describe tu queja o reclamación</label>
                 <textarea id="descripcion" name="descripcion" rows="3" minlength="10" maxlength="2000" class="campo-input"
-                          placeholder="Ej: La costura lateral de la cintura venía suelta de fábrica..." required></textarea>
+                          placeholder="Cuéntanos qué ocurrió y cómo podemos ayudarte..." required></textarea>
             </div>
 
             <div class="acciones">
-                <button type="submit" class="btn-enviar">Enviar Reporte de Garantía</button>
+                <button type="submit" class="btn-enviar">Enviar solicitud</button>
                 <button type="button" id="cerrarModal" class="btn-cancelar">Cancelar</button>
             </div>
         </form>

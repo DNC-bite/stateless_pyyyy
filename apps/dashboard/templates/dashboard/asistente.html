@@ -1,0 +1,27 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+{% block title %}Asistente IA · Panel STATELESS{% endblock %}
+{% block content %}
+<div class="page-heading">
+    <div><p class="eyebrow">Asistente privado</p><h1>IA administrativa</h1></div>
+    <span class="badge badge-green">{{ modelo_ia }} · {{ num_ctx }} tokens de contexto</span>
+</div>
+<section class="assistant-panel">
+    <p class="assistant-note">Cada pregunta consulta datos actuales de ventas, pedidos, inventario y reclamos. La consulta se procesa en Ollama local; no se envían datos a servicios externos. La IA tiene acceso de solo lectura y no recibe nombres, correos ni direcciones de clientes.</p>
+    <div id="assistant-messages" class="assistant-messages" aria-live="polite">
+        {% for turno in historial %}
+        <article class="assistant-message assistant-question"><strong>Tú</strong><p>{{ turno.question }}</p></article>
+        <article class="assistant-message"><strong>STATELESS IA</strong><p>{{ turno.answer }}</p></article>
+        {% empty %}
+        <p class="assistant-empty">Por ejemplo: “¿Qué productos tienen menos stock que el mínimo?” o “¿Cuántos pedidos están en preparación?”</p>
+        {% endfor %}
+    </div>
+    <form id="assistant-form" action="{% url 'dashboard:asistente_preguntar' %}" method="post">
+        {% csrf_token %}
+        <label for="assistant-question">Pregunta sobre la operación de la tienda</label>
+        <textarea id="assistant-question" name="question" maxlength="1000" rows="3" required placeholder="Escribe tu pregunta..."></textarea>
+        <div class="assistant-form-footer"><small>Respuesta basada en datos consultados ahora · Máximo 1000 caracteres</small><button class="button button-primary" type="submit">Preguntar a la IA</button></div>
+    </form>
+</section>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/admin-assistant.js' %}"></script>{% endblock %}

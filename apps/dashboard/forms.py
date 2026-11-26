@@ -5,7 +5,9 @@ from django.forms import inlineformset_factory
 
 from apps.accounts.models import Role, User
 from apps.catalog.models import Categoria, Producto, ProductoImagen, ProductoVariante, Proveedor
-from apps.orders.models import Envio, Venta
+from apps.orders.models import Envio, GarantiaReclamo, Venta
+
+MAX_TAMANO_MODELO_3D = 150 * 1024 * 1024
 
 
 class AdminModelForm(forms.ModelForm):
@@ -93,8 +95,8 @@ class ProductoForm(ImagenUploadForm):
 
     def clean_modelo_3d_archivo(self):
         archivo = self.cleaned_data.get("modelo_3d_archivo")
-        if archivo and archivo.size > 50 * 1024 * 1024:
-            raise forms.ValidationError("El modelo 3D no puede superar 50 MB.")
+        if archivo and archivo.size > MAX_TAMANO_MODELO_3D:
+            raise forms.ValidationError("El modelo 3D no puede superar 150 MB.")
         return archivo
 
     def save(self, commit=True):
@@ -164,6 +166,21 @@ class EnvioAdminForm(forms.Form):
         label="Número de guía",
         widget=forms.TextInput(attrs={"class": "form-control"}),
     )
+
+
+class ReclamoAdminForm(AdminModelForm):
+    respuesta_admin = forms.CharField(
+        required=False,
+        max_length=2000,
+        widget=forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+    )
+
+    class Meta:
+        model = GarantiaReclamo
+        fields = ("estado", "respuesta_admin")
+        widgets = {
+            "estado": forms.Select(attrs={"class": "form-select"}),
+        }
 
 
 class ReporteFiltroForm(forms.Form):

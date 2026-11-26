@@ -1,3 +1,6 @@
+import json
+from unittest.mock import patch
+
 from django.test import TestCase
 
 from apps.catalog.models import Categoria, Producto, ProductoVariante, Proveedor
@@ -116,6 +119,43 @@ class FichaTests(TestCase):
         self.assertContains(self.client.get(f"/producto/{con.id}"), 'src="https://res.cloudinary.com/x/y.webp"')
         local = hacer("Local", imagen="Cargo_Oversize_negro_esencial.jpg")
         self.assertContains(self.client.get(f"/producto/{local.id}"), "/static/images/Cargo_Oversize_negro_esencial.jpg")
+
+
+class RecomendacionesIATests(TestCase):
+    def test_endpoint_devuelve_enlaces_de_prendas_recomendadas(self):
+        base = hacer("Camisa base")
+        recomendado = hacer("Pantalón")
+        with patch(
+            "apps.catalog.views.recomendar_prendas",
+            return_value=[{"producto": recomendado, "razon": "Combina por estilo."}],
+        ):
+            response = self.client.post(
+                f"/producto/{base.pk}/recomendar",
+                data=json.dumps({"request": "Look casual"}),
+                content_type="application/json",
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["recommendations"][0]["id"], recomendado.pk)
+        self.assertEqual(response.json()["recommendations"][0]["url"], f"/producto/{recomendado.pk}")
+
+    def test_solo_recomienda_prendas_activas_con_stock(self):
+        base = hacer("Camisa base")
+        disponible = hacer("Pantalón disponible")
+        agotado = hacer("Pantalón agotado", stock=0)
+
+        from apps.catalog.ai import recomendar_prendas
+        respuesta = json.dumps({
+            "recommendations": [
+                {"product_id": disponible.pk, "reason": "Combina por estilo."},
+                {"product_id": agotado.pk, "reason": "No disponible."},
+                {"product_id": 99999, "reason": "No existe."},
+            ]
+        })
+        with patch("apps.catalog.ai.responder_ollama", return_value=respuesta) as responder:
+            recomendaciones = recomendar_prendas(base)
+
+        self.assertEqual([item["producto"] for item in recomendaciones], [disponible])
+        self.assertIn("catalogo_disponible", responder.call_args[0][0][1]["content"])
 
 
 class BuscadorTests(TestCase):

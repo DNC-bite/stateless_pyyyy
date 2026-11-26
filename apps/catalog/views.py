@@ -1,10 +1,16 @@
+import json
 from decimal import Decimal, InvalidOperation
 
 from django.db.models import Q
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
-from django.views.decorators.http import require_GET
+from django.urls import reverse
+from django.views.decorators.http import require_GET, require_POST
 
+from apps.core import ratelimit
+from apps.core.ai import IAError
 from .models import Categoria, Producto
+from .ai import recomendar_prendas
 
 
 def _catalogo_base():
@@ -44,7 +50,43 @@ def producto_detalle(request, pk):
     })
 
 
-@require_GET
+@require_POST
+def recomendar_view(request, pk):
+    producto = get_object_or_404(
+        Producto.objects.activos().select_related("categoria").prefetch_related("variantes"), pk=pk
+    )
+    try:
+        datos = json.loads(request.body.decode("utf-8"))
+    except (ValueError, UnicodeDecodeError):
+        return JsonResponse({"error": "La solicitud debe contener JSON válido."}, status=400)
+    if not isinstance(datos, dict):
+        return JsonResponse({"error": "La solicitud de recomendaciones no es válida."}, status=400)
+    solicitud = datos.get("request", "")
+    if not isinstance(solicitud, str) or len(solicitud) > 500:
+        return JsonResponse({"error": "La petición debe tener máximo 500 caracteres."}, status=400)
+    ip = ratelimit.ip_del_cliente(request)
+    if not ratelimit.permitir(f"recomendaciones-ia:{ip}", 20, 60 * 60):
+        return JsonResponse({"error": "Has solicitado muchas recomendaciones. Inténtalo más tarde."}, status=429)
+    try:
+        recomendaciones = recomendar_prendas(producto, solicitud.strip())
+    except IAError as exc:
+        return JsonResponse({"error": str(exc)}, status=503)
+    except ValueError as exc:
+        return JsonResponse({"error": str(exc)}, status=502)
+    return JsonResponse({
+        "recommendations": [
+            {
+                "id": item["producto"].pk,
+                "name": item["producto"].nombre,
+                "price": str(item["producto"].precio),
+                "url": reverse("producto", args=[item["producto"].pk]),
+                "reason": item["razon"],
+            }
+            for item in recomendaciones
+        ]
+    })
+
+
 def catalogo(request):
     """Catálogo completo con filtros: palabra clave, categoría, precio máximo y solo disponibles."""
     q = request.GET.get("q", "").strip()
