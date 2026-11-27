@@ -44,7 +44,7 @@ class LoginTests(AcceptTestCase):
     def test_login_correcto_va_a_cuenta(self):
         crear()
         r = self.client.post("/login", {"email": "ANA@correo.com", "password": CLAVE})
-        self.assertRedirects(r, "/checkout", fetch_redirect_response=False)
+        self.assertRedirects(r, "/account", fetch_redirect_response=False)
         self.assertIn("_auth_user_id", self.client.session)
 
     def test_credenciales_incorrectas_mensaje_generico(self):
@@ -74,7 +74,7 @@ class LoginTests(AcceptTestCase):
         self.assertRedirects(r, "/checkout", fetch_redirect_response=False)
         self.client.logout()
         r = self.client.post("/login", {"email": "ana@correo.com", "password": CLAVE, "next": "https://malo.com/x"})
-        self.assertRedirects(r, "/checkout", fetch_redirect_response=False)
+        self.assertRedirects(r, "/account", fetch_redirect_response=False)
 
     @override_settings(LIMITE_LOGIN=(3, 600))
     def test_limite_de_intentos(self):
@@ -160,7 +160,7 @@ class RegistroYVerificacionTests(AcceptTestCase):
         self.assertTrue(u.email_verified)
         self.assertEqual(u.email_token, "")
         r = self.client.post("/login", {"email": "luis@correo.com", "password": CLAVE})
-        self.assertRedirects(r, "/checkout", fetch_redirect_response=False)
+        self.assertRedirects(r, "/account", fetch_redirect_response=False)
 
     def test_enlace_invalido_o_vencido(self):
         self.registrar()
@@ -230,7 +230,7 @@ class RecuperarClaveTests(AcceptTestCase):
         r = self.client.post(r.url, {"new_password1": "Nueva-clave-77", "new_password2": "Nueva-clave-77"})
         self.assertRedirects(r, "/login", fetch_redirect_response=False)
         r = self.client.post("/login", {"email": "ana@correo.com", "password": "Nueva-clave-77"})
-        self.assertRedirects(r, "/checkout", fetch_redirect_response=False)
+        self.assertRedirects(r, "/account", fetch_redirect_response=False)
         self.client.logout()
         self.assertContains(Client().get(camino), "ENLACE NO VÁLIDO")  # ya usado
 

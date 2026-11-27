@@ -1,0 +1,51 @@
+{% extends "base_store.html" %}
+{% load static %}
+{% block title %}{{ producto.nombre }} — STATELESS{% endblock %}
+{% block content %}
+<main class="container py-5">
+    <p class="small text-uppercase text-secondary"><a class="link-secondary" href="{% url 'coleccion' producto.categoria.slug %}">{{ producto.categoria.nombre }}</a></p>
+    <div class="row g-5">
+        <div class="col-md-6">
+            <img class="w-100" src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}"
+                 style="aspect-ratio:3/4;object-fit:cover;background:#171717"
+                 onerror="this.onerror=null;this.src='{% static 'images/placeholder.svg' %}'">
+        </div>
+        <div class="col-md-6">
+            <h1>{{ producto.nombre }}</h1>
+            <p class="h4">${{ producto.precio|floatformat:0 }}</p>
+            {% if producto.descripcion %}<p class="text-secondary">{{ producto.descripcion }}</p>{% endif %}
+            {% if producto.agotado %}
+                <p class="text-warning">Producto agotado.</p>
+            {% else %}
+                <form method="post" action="{% url 'agregar_carrito' producto.id %}" class="mt-4">
+                    {% csrf_token %}
+                    {% if variantes %}
+                    <label class="form-label" for="variante">Color</label>
+                    <select class="form-select mb-3" id="variante" name="variante_id" required>
+                        <option value="">Selecciona un color</option>
+                        {% if producto.stock_actual %}
+                        <option value="0">Original</option>
+                        {% endif %}
+                        {% for variante in variantes %}
+                        <option value="{{ variante.id }}" {% if not variante.stock_actual %}disabled{% endif %}>
+                            {{ variante.color }}{% if not variante.stock_actual %} (agotado){% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    {% endif %}
+                    {% if tallas %}
+                    <label class="form-label" for="talla">Talla</label>
+                    <select class="form-select mb-3" id="talla" name="talla" required>
+                        <option value="">Selecciona una talla</option>
+                        {% for talla in tallas %}<option value="{{ talla }}">{{ talla }}</option>{% endfor %}
+                    </select>
+                    {% endif %}
+                    <label class="form-label" for="cantidad">Cantidad</label>
+                    <input class="form-control mb-3" id="cantidad" name="cantidad" type="number" min="1" value="1" required>
+                    <button class="btn btn-light w-100" type="submit">Agregar al carrito</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+</main>
+{% endblock %}

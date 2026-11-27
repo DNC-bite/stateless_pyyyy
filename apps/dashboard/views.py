@@ -25,7 +25,7 @@ from apps.accounts.models import Role
 from apps.catalog.models import Categoria, Producto, Proveedor
 from apps.core import ratelimit
 from apps.core.ai import IAError, responder_ollama
-from apps.core.utils import desglose_iva
+from apps.core.utils import desglose_iva, sin_acentos
 from apps.orders import services as pedidos_services
 from apps.orders.models import Envio, GarantiaReclamo, Venta, VentaItem
 
@@ -118,6 +118,7 @@ def _datos_panel_para_ia():
         .select_related("categoria")
         .order_by("nombre")[:200]
     )
+    proveedores = list(Proveedor.objects.order_by("nombre").values_list("nombre", flat=True))
     ventas_recientes = list(
         Venta.objects.order_by("-created_at", "-id")
         .values("id", "created_at", "estado", "total")[:30]
@@ -160,6 +161,10 @@ def _datos_panel_para_ia():
             "productos_activos": Producto.objects.activos().count(),
             "productos_con_stock_bajo": Producto.objects.stock_bajo().count(),
             "productos_sin_stock": Producto.objects.sin_stock().count(),
+        },
+        "resumen_proveedores": {
+            "cantidad": len(proveedores),
+            "nombres": proveedores,
         },
         "resumen_ventas_pagadas": {
             "cantidad": resumen_ventas["cantidad"],
@@ -230,6 +235,38 @@ def asistente_preguntar(request):
 
     clave_historial = f"asistente_admin_{request.user.pk}"
     historial = request.session.get(clave_historial, [])[-5:]
+    pregunta_normalizada = sin_acentos(pregunta)
+    if "proveedor" in pregunta_normalizada and any(
+        termino in pregunta_normalizada for termino in ("cuanto", "cual", "nombre", "lista")
+    ):
+        proveedores = list(Proveedor.objects.order_by("nombre").values_list("nombre", flat=True))
+        cantidad = len(proveedores)
+        if cantidad:
+            sustantivo = "proveedor" if cantidad == 1 else "proveedores"
+            participio = "registrado" if cantidad == 1 else "registrados"
+            respuesta = f"Hay {cantidad} {sustantivo} {participio}: {', '.join(proveedores)}."
+        else:
+            respuesta = "No hay proveedores registrados."
+        historial.append({"question": pregunta.strip(), "answer": respuesta})
+        request.session[clave_historial] = historial[-5:]
+        return JsonResponse({
+            "answer": respuesta,
+            "updated_at": timezone.localtime().isoformat(timespec="seconds"),
+        })
+    if "producto" in pregunta_normalizada and any(
+        termino in pregunta_normalizada for termino in ("cuanto", "cantidad", "numero", "total")
+    ):
+        cantidad = Producto.objects.count()
+        sustantivo = "producto" if cantidad == 1 else "productos"
+        participio = "registrado" if cantidad == 1 else "registrados"
+        respuesta = f"Hay {cantidad} {sustantivo} {participio}."
+        historial.append({"question": pregunta.strip(), "answer": respuesta})
+        request.session[clave_historial] = historial[-5:]
+        return JsonResponse({
+            "answer": respuesta,
+            "updated_at": timezone.localtime().isoformat(timespec="seconds"),
+        })
+
     contexto = _datos_panel_para_ia()
     mensajes = [{
         "role": "system",
