@@ -24,6 +24,7 @@ class Venta(models.Model):
         EFECTY = "efecty", "Efecty"
         NEQUI = "nequi", "Nequi"
         PSE = "pse", "PSE"
+        MERCADO_PAGO = "mercado_pago", "Mercado Pago"
         TARJETA = "tarjeta", "Tarjeta"  # valor histórico del sistema anterior
 
     class MotivoCancelacion(models.TextChoices):

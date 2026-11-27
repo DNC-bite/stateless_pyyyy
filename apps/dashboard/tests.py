@@ -62,12 +62,40 @@ class PanelAdminTests(TestCase):
         self.assertEqual(response.json()["answer"], "Hay un pedido confirmado.")
         prompt = responder.call_args[0][0][-1]["content"]
         self.assertIn("resumen_ventas_pagadas", prompt)
+        self.assertIn("resumen_proveedores", prompt)
         self.assertIn("Camiseta", prompt)
+        self.assertIn("Proveedor Demo", prompt)
         instrucciones = responder.call_args[0][0][0]["content"]
         self.assertIn("punto para miles y coma para decimales", instrucciones)
         self.assertIn("Nunca uses coma como separador de miles", instrucciones)
         self.assertNotIn(self.cliente.email, prompt)
         self.assertNotIn(self.cliente.name, prompt)
+
+    @patch("apps.dashboard.views.responder_ollama")
+    def test_asistente_responde_nombres_de_proveedores_sin_ollama(self, responder):
+        response = self.client.post(
+            "/admin/asistente/preguntar",
+            data='{"question":"¿Cuántos proveedores hay y cuáles son sus nombres?"}',
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["answer"], "Hay 1 proveedor registrado: Proveedor Demo.")
+        self.assertIn("updated_at", response.json())
+        responder.assert_not_called()
+
+    @patch("apps.dashboard.views.responder_ollama")
+    def test_asistente_responde_conteo_de_productos_sin_ollama(self, responder):
+        response = self.client.post(
+            "/admin/asistente/preguntar",
+            data='{"question":"¿Cuántos productos hay registrados?"}',
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["answer"], "Hay 1 producto registrado.")
+        self.assertIn("updated_at", response.json())
+        responder.assert_not_called()
 
     def test_asistente_rechaza_pregunta_invalida(self):
         response = self.client.post(

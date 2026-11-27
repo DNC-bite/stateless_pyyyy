@@ -1,0 +1,24 @@
+{% extends "base_store.html" %}
+{% load stateless %}
+{% block title %}Mis pedidos — STATELESS{% endblock %}
+{% block content %}
+<main class="container py-5">
+    <h1 class="mb-4">Mis pedidos</h1>
+    {% for order in orders %}
+        <a class="d-block text-light text-decoration-none border border-secondary p-4 mb-3"
+           href="{% url 'pedido_detalle' order.id %}">
+            <div class="d-flex justify-content-between flex-wrap gap-2">
+                <strong>{{ order.numero_factura }}</strong>
+                <span>{{ order.get_estado_display }}</span>
+                <span>${{ order.total|cop }} COP</span>
+            </div>
+            <small class="text-secondary">{{ order.created_at|date:"d/m/Y H:i" }} · {{ order.items.count }} artículo(s)</small>
+        </a>
+    {% empty %}
+        <section class="border border-secondary p-5 text-center">
+            <h2 class="h4">Aún no tienes pedidos</h2>
+            <a class="btn btn-light mt-3" href="{% url 'home' %}">Explorar la tienda</a>
+        </section>
+    {% endfor %}
+</main>
+{% endblock %}
