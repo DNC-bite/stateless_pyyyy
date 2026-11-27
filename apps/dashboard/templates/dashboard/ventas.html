@@ -1,0 +1,40 @@
+{% extends "dashboard/base.html" %}
+{% load dashboard_tags %}
+{% block title %}Ventas · Panel STATELESS{% endblock %}
+{% block content %}
+<div class="page-heading"><h1>Lista de ventas</h1></div>
+<section class="summary-grid summary-grid-three">
+    <article class="summary-card"><span>Total recaudado</span><strong>{{ total_recaudado|cop }}</strong></article>
+    <article class="summary-card"><span>Total pedidos</span><strong>{{ total_pedidos }}</strong></article>
+    <article class="summary-card"><span>Tipo principal</span><strong class="summary-label">{{ tipo_principal.tipo_venta|default:"Sin ventas"|upper }}</strong></article>
+</section>
+<div class="table-wrap panel-table">
+    <table>
+        <thead><tr><th>ID</th><th>Fecha</th><th>Cliente</th><th>Método</th><th>Total</th><th>Estado actual</th><th>Acciones</th></tr></thead>
+        <tbody>
+        {% for venta in ventas %}
+            <tr>
+                <td><strong>#{{ venta.id }}</strong></td>
+                <td>{{ venta.created_at|date:"d/m/Y H:i" }}</td>
+                <td>{{ venta.usuario.name }}</td>
+                <td>{{ venta.get_metodo_pago_display }}</td>
+                <td><strong>{{ venta.total|cop }}</strong></td>
+                <td>
+                    {% if venta.cancelada %}<span class="badge badge-red">{{ venta.get_estado_display }}</span>
+                    {% else %}
+                    <form class="inline-form" method="post" action="{% url 'dashboard:venta_estado' venta.pk %}">
+                        {% csrf_token %}
+                        <select name="estado" aria-label="Estado del pedido {{ venta.id }}">
+                            {% for estado in estados_venta %}<option value="{{ estado.0 }}" {% if venta.estado == estado.0 %}selected{% endif %}>{{ estado.1 }}</option>{% endfor %}
+                        </select>
+                        <button class="button button-small" type="submit">Guardar</button>
+                    </form>
+                    {% endif %}
+                </td>
+                <td><a class="button button-small" href="{% url 'dashboard:venta_detalle' venta.pk %}">Ver detalle</a></td>
+            </tr>
+        {% empty %}<tr><td class="empty-cell" colspan="7">No hay pedidos registrados todavía.</td></tr>{% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

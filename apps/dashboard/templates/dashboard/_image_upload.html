@@ -1,0 +1,14 @@
+<div class="form-field image-field {% if wide %}field-wide{% endif %}">
+    {{ upload_field.label_tag }}
+    {{ upload_field.errors }}
+    <div class="image-upload" data-image-upload>
+        <label class="image-dropzone" for="{{ upload_field.id_for_label }}">
+            {{ upload_field }}
+            <span>Arrastra una imagen aquí o haz clic para seleccionarla</span>
+        </label>
+        <div class="image-preview" data-image-preview {% if not stored_value %}hidden{% endif %}>
+            <img data-preview-image src="{{ stored_url }}" alt="Vista previa de la imagen" {% if not stored_value %}hidden{% endif %}>
+            <span data-image-status>{% if stored_value %}Imagen actual{% endif %}</span>
+        </div>
+    </div>
+</div>

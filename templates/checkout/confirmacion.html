@@ -1,0 +1,79 @@
+{% load static stateless %}<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedido #{{ venta.id }} - STATELESS</title>
+    <link rel="icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <link href="{% static 'css/confirmation.css' %}" rel="stylesheet">
+</head>
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <a href="{% url 'home' %}" class="logo-title">STATELESS</a>
+        <div>
+            {% if venta.estado == 'pendiente_pago' %}
+                <span class="badge-pendiente">⏳ Pedido recibido · Pendiente de pago</span>
+            {% else %}
+                <span class="badge-success">✓ Pago Aprobado &amp; Orden Confirmada</span>
+            {% endif %}
+        </div>
+        <h1 class="pedido-titulo">PEDIDO #{{ venta.id }}</h1>
+        <p class="sub">Te enviamos la confirmación de tu compra a tu correo.</p>
+    </div>
+
+    <div class="grid-2">
+        <div class="card">
+            <p class="label">Comprador</p>
+            <p class="val">{{ venta.usuario.name }}</p>
+            <p class="sub" style="margin-top:2px;">{{ venta.usuario.email }}</p>
+            <hr>
+            <p class="label">{% if venta.estado == 'pendiente_pago' %}Total a pagar{% else %}Total{% endif %}</p>
+            <p class="val total">${{ venta.total|cop }} COP</p>
+        </div>
+
+        <div class="card">
+            <p class="label">Dirección de Entrega</p>
+            <p class="val">{{ envio.direccion }}{% if envio.apartamento %} · {{ envio.apartamento }}{% endif %}</p>
+            <p class="sub" style="margin-top:2px;">{{ envio.ciudad }}{% if envio.departamento %}, {{ envio.departamento }}{% endif %}</p>
+            {% if envio.destinatario %}<p class="sub" style="margin-top:2px;">Recibe: {{ envio.destinatario }}</p>{% endif %}
+            <hr>
+            <p class="label">Método de Pago</p>
+            <p class="val" style="text-transform:uppercase;">{{ venta.get_metodo_pago_display }}</p>
+            {% if venta.codigo_pago %}<p class="sub" style="margin-top:6px;">Código de pago: <strong style="color:#fff;">{{ venta.codigo_pago }}</strong></p>{% endif %}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="map-head">
+            <div>
+                <p class="label" style="margin:0;">Ubicación de Entrega en el Mapa</p>
+                <p class="sub">Verifica que el pin coincida con tu domicilio.</p>
+            </div>
+            <span id="map-status">📍 Localizando domicilio...</span>
+        </div>
+        <div id="map-box" data-direccion="{{ envio.direccion }}" data-ciudad="{{ envio.ciudad }}" data-departamento="{{ envio.departamento }}"></div>
+    </div>
+
+    <div class="acciones">
+        <a href="{% url 'home' %}" class="btn-outline">← Seguir Comprando</a>
+        <div class="grupo">
+            <a href="{% url 'factura' venta.id %}" class="btn-outline">Ver Factura Oficial</a>
+            <a href="{% url 'tracking' venta.id %}" class="btn-action">Rastrear mi Pedido →</a>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="{% static 'js/confirmacion.js' %}"></script>
+</body>
+</html>

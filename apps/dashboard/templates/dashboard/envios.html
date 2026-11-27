@@ -1,0 +1,28 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Envíos · Panel STATELESS{% endblock %}
+{% block content %}
+<div class="page-heading"><h1>Logística y envíos</h1></div>
+<div class="table-wrap panel-table">
+    <table><thead><tr><th>ID</th><th>Pedido</th><th>Ciudad</th><th>Dirección</th><th>Transportadora</th><th>N.º guía</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody>{% for envio in envios %}
+            <tr>
+                <td>{{ envio.pk }}</td><td><a class="text-link" href="{% url 'dashboard:venta_detalle' envio.venta_id %}">#{{ envio.venta_id }}</a></td>
+                <td>{{ envio.ciudad }}</td><td>{{ envio.direccion }}{% if envio.apartamento %}, {{ envio.apartamento }}{% endif %}</td>
+                <td>{{ envio.get_transportadora_display|default:"Pendiente" }}</td><td>{{ envio.numero_guia|default:"—" }}</td>
+                <td><span class="badge {% if envio.estado == 'entregado' %}badge-green{% elif envio.estado == 'en_curso' %}badge-blue{% elif envio.estado == 'preparando' %}badge-orange{% else %}badge-gray{% endif %}">{{ envio.get_estado_display }}</span></td>
+                <td>
+                    <details class="shipping-editor"><summary class="button button-small">Asignar guía</summary>
+                        <form class="shipping-form" method="post" action="{% url 'dashboard:envio_actualizar' envio.pk %}">
+                            {% csrf_token %}
+                            <label>Estado<select name="estado">{% for value,label in estados_envio %}<option value="{{ value }}" {% if envio.estado == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+                            <label>Transportadora<select name="transportadora"><option value="">Selecciona</option>{% for value,label in transportadoras %}<option value="{{ value }}" {% if envio.transportadora == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+                            <label>Número de guía<input name="numero_guia" maxlength="60" value="{{ envio.numero_guia }}"></label>
+                            <button class="button button-primary button-small" type="submit">Guardar</button>
+                        </form>
+                    </details>
+                </td>
+            </tr>
+        {% empty %}<tr><td class="empty-cell" colspan="8">No hay envíos pendientes de gestión.</td></tr>{% endfor %}</tbody>
+    </table>
+</div>
+{% endblock %}

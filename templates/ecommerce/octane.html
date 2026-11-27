@@ -1,0 +1,58 @@
+{% extends "base_store.html" %}
+{% load static stateless %}
+{% block title %}Octane — STATELESS{% endblock %}
+{% block extra_css %}<link href="{% static 'css/octane.css' %}" rel="stylesheet">{% endblock %}
+{% block content %}
+<section class="octane-page">
+
+<canvas id="smokeCanvas"></canvas>
+
+<div class="hero-octane">
+    <div class="hero-octane-inner">
+        <div class="tag">OCTANE // DRIFT DIVISION</div>
+        <h1>MIDNIGHT<br>DRIFT</h1>
+        <p>CONTROL THROUGH CHAOS</p>
+        <a href="#catalogo-octane">ENTER THE GARAGE</a>
+    </div>
+</div>
+
+<div class="rpm-section">
+    <div class="rpm-gauge"><span>Drift Angle</span><div class="rpm-bars" id="bars-angle"></div><div class="valor" id="val-angle">48°</div></div>
+    <div class="rpm-gauge"><span>Grip Level</span><div class="rpm-bars" id="bars-grip"></div><div class="valor" id="val-grip">62%</div></div>
+    <div class="rpm-gauge"><span>Tire Smoke</span><div class="rpm-bars" id="bars-smoke"></div><div class="valor" id="val-smoke">95%</div></div>
+    <div class="rpm-gauge"><span>Turbo Boost</span><div class="rpm-bars" id="bars-boost"></div><div class="valor" id="val-boost">1.6 BAR</div></div>
+</div>
+
+<div id="catalogo-octane" class="octane-catalogo">
+    <div class="octane-catalogo-head">
+        <p>MIDNIGHT RUN COLLECTION</p>
+        <h2>DRIFT GARAGE</h2>
+    </div>
+
+    <div class="octane-grid">
+        {% for p in productos %}
+        <div class="product-card-octane">
+            {% if p.agotado %}<span class="octane-agotado">SOLD OUT</span>{% endif %}
+            <a class="enlace" href="{% url 'producto' p.id %}">
+                <img src="{{ p.imagen_url }}" alt="{{ p.nombre }}" loading="lazy">
+                <div class="info">
+                    <div class="unit">UNIT // OCTANE</div>
+                    <h3>{{ p.nombre }}</h3>
+                    <div class="price">PRICE &gt;&gt; ${{ p.precio|cop }} COP</div>
+                </div>
+            </a>
+            {% if p.agotado %}
+                <span class="btn-octane-cart agotado">[ AGOTADO ]</span>
+            {% else %}
+                <a href="{% url 'producto' p.id %}" class="btn-octane-cart">[ ELEGIR TALLA // VER ]</a>
+            {% endif %}
+        </div>
+        {% empty %}
+        <p class="octane-vacio">Pronto nuevas prendas.</p>
+        {% endfor %}
+    </div>
+</div>
+
+</section>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/octane.js' %}"></script>{% endblock %}

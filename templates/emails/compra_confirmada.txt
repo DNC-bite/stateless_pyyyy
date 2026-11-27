@@ -1,0 +1,9 @@
+{% load stateless %}Hola {{ nombre }},
+
+{% if pagado %}Recibimos el pago de tu pedido{% else %}Recibimos tu pedido{% endif %} #{{ venta.id }} por ${{ venta.total|cop }} COP.
+Método de pago: {{ metodo }}
+Estado: {% if pagado %}PAGO APROBADO{% else %}PENDIENTE DE PAGO{% if venta.codigo_pago %} (código {{ venta.codigo_pago }}){% endif %}{% endif %}
+
+Rastrea tu pedido: {{ seguimiento_url }}
+
+STATELESS

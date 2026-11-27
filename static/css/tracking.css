@@ -1,0 +1,34 @@
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Space Grotesk', sans-serif; }
+body { background: #000; color: #fff; min-height: 100vh; padding: 40px 20px; }
+.container { max-width: 850px; margin: 0 auto; }
+.nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 1px solid #111; }
+.nav .logo { font-family: 'Bebas Neue'; font-size: 28px; letter-spacing: 4px; color: #fff; text-decoration: none; }
+.nav-back { color: #fff; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; text-decoration: underline; }
+.header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid #222; padding-bottom: 20px; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
+.header p.kicker { font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: #888; margin-bottom: 4px; }
+.header h1 { font-family: 'Bebas Neue'; font-size: 42px; letter-spacing: 5px; margin: 0; }
+.chip { font-size: 12px; font-weight: 700; padding: 6px 12px; background: #1a1a1a; border: 1px solid #333; text-transform: uppercase; letter-spacing: 1px; }
+.chip-ok { color: #00ff88; }
+.chip-pendiente { color: #ffaa00; }
+.chip-cancelado { color: #ff5555; border-color: #661111; }
+.card { background: #0d0d0d; border: 1px solid #222; padding: 28px; margin-bottom: 24px; border-radius: 8px; }
+.timeline { display: flex; justify-content: space-between; position: relative; max-width: 650px; margin: 20px auto 10px; }
+.timeline-step { text-align: center; width: 25%; }
+.step-dot { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; margin: 0 auto 10px; }
+.dot-active { background: #fff; color: #000; box-shadow: 0 0 14px rgba(255,255,255,0.4); }
+.dot-inactive { background: #1a1a1a; color: #555; border: 1px solid #333; }
+.step-txt { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; }
+.txt-active { color: #fff; font-weight: 700; }
+.txt-inactive { color: #555; }
+.label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #777; font-weight: 700; margin-bottom: 6px; }
+.val { font-size: 14px; font-weight: 600; margin-bottom: 16px; color: #fff; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+.grid-2 .card { margin-bottom: 0; }
+.card hr { border: 0; border-top: 1px solid #222; margin: 16px 0; }
+.cancelado-aviso { text-align: center; padding: 10px 0; }
+.cancelado-aviso h2 { font-family: 'Bebas Neue'; font-size: 30px; letter-spacing: 3px; color: #ff5555; margin-bottom: 6px; }
+.cancelado-aviso p { font-size: 13px; color: #aaa; }
+.total-fila { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+.total-monto { font-family: 'Bebas Neue'; font-size: 32px; color: #00ff88; }
+.btn-factura { background: #fff; color: #000; text-decoration: none; padding: 10px 20px; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; display: inline-block; border-radius: 4px; }
+@media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } .timeline { flex-wrap: wrap; row-gap: 16px; } }

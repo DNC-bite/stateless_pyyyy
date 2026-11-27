@@ -1,0 +1,52 @@
+{% extends "dashboard/base.html" %}
+{% load dashboard_tags %}
+{% block title %}Inicio · Panel STATELESS{% endblock %}
+{% block content %}
+<section class="summary-grid summary-grid-four">
+    <article class="summary-card"><span>Ventas totales</span><strong>{{ total_ventas|cop }}</strong></article>
+    <article class="summary-card"><span>Total pedidos</span><strong>{{ total_pedidos }}</strong></article>
+    <article class="summary-card"><span>Clientes</span><strong>{{ total_clientes }}</strong></article>
+    <article class="summary-card"><span>Productos</span><strong>{{ total_productos }}</strong></article>
+</section>
+<section class="dashboard-grid">
+    <article class="panel-card chart-card">
+        <h2>Ventas últimos 30 días</h2>
+        <div class="sales-chart" role="img" aria-label="Ventas diarias de los últimos treinta días">
+            {% for dia in dias %}
+                <div class="chart-column" title="{{ dia.fecha|date:'d/m' }} · {{ dia.total|cop }}">
+                    <span class="chart-bar" style="height:{{ dia.alto }}%"></span>
+                    {% if forloop.counter0|divisibleby:5 %}<small>{{ dia.fecha|date:"d/m" }}</small>{% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </article>
+    <article class="panel-card payment-card">
+        <h2>Métodos de pago</h2>
+        <div class="payment-donut" style="background:{{ gradiente_metodos }}"></div>
+        <div class="legend">
+            {% for metodo in metodos %}<span><i></i>{{ metodo.metodo_pago|upper }}</span>{% empty %}<span>Sin ventas todavía</span>{% endfor %}
+        </div>
+    </article>
+</section>
+<section class="dashboard-grid lower-grid">
+    <article class="panel-card">
+        <div class="section-title"><h2>Ventas recientes</h2><a href="{% url 'dashboard:ventas' %}">Ver todas</a></div>
+        <div class="table-wrap">
+            <table><thead><tr><th>Cliente</th><th>Método</th><th>Total</th></tr></thead>
+                <tbody>{% for venta in ventas_recientes %}
+                    <tr><td>{{ venta.usuario.name }}</td><td>{{ venta.get_metodo_pago_display }}</td><td>{{ venta.total|cop }}</td></tr>
+                {% empty %}<tr><td class="empty-cell" colspan="3">No hay ventas registradas aún.</td></tr>{% endfor %}</tbody>
+            </table>
+        </div>
+    </article>
+    <article class="panel-card">
+        <h2>Accesos rápidos</h2>
+        <div class="quick-links">
+            <a href="{% url 'dashboard:producto_crear' %}">+ Nuevo producto</a>
+            <a href="{% url 'dashboard:proveedor_crear' %}">+ Nuevo proveedor</a>
+            <a href="{% url 'dashboard:categoria_crear' %}">+ Nueva categoría</a>
+            <a class="primary-link" href="{% url 'dashboard:reportes' %}">▥ Reporte financiero</a>
+        </div>
+    </article>
+</section>
+{% endblock %}

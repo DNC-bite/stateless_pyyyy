@@ -1,0 +1,14 @@
+Django>=5.2,<5.3
+mysqlclient>=2.2
+python-dotenv>=1.0
+Pillow>=10.0
+requests>=2.31
+reportlab>=4.0
+openpyxl>=3.1
+# Las siguientes se usan en las partes 2 en adelante (acceso con Google/Spotify e imágenes):
+django-allauth>=65.0
+cloudinary>=1.40
+djangorestframework>=3.18
+mercadopago>=3.6
+# Si mysqlclient no se instala en Windows, comenta su línea y descomenta esta:
+# PyMySQL>=1.1

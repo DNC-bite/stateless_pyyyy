@@ -1,0 +1,40 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Quejas y reclamos · Panel STATELESS{% endblock %}
+{% block content %}
+<div class="page-heading">
+    <div><p class="eyebrow">Atención al cliente · {{ pendientes }} pendientes</p><h1>Quejas y reclamos</h1></div>
+</div>
+<div class="table-wrap panel-table">
+    <table>
+        <thead><tr><th>Radicado</th><th>Cliente</th><th>Fecha</th><th>Pedido / prenda</th><th>Tipo y descripción</th><th>Gestión</th></tr></thead>
+        <tbody>
+        {% for reclamo in reclamos %}
+            <tr>
+                <td>#GAR-{{ reclamo.pk }}<br><span class="badge badge-orange">{{ reclamo.get_estado_display }}</span></td>
+                <td>{{ reclamo.usuario.name }}<br><small>{{ reclamo.usuario.email }}</small></td>
+                <td>{{ reclamo.created_at|date:"d/m/Y H:i" }}</td>
+                <td>
+                    {% if reclamo.venta %}<a class="text-link" href="{% url 'dashboard:venta_detalle' reclamo.venta_id %}">Pedido #{{ reclamo.venta_id }}</a>{% else %}Sin pedido asociado{% endif %}
+                    <br>{{ reclamo.producto.nombre|default:"Queja general" }}
+                </td>
+                <td><strong>{{ reclamo.get_tipo_incidencia_display }}</strong><br>{{ reclamo.descripcion_cliente }}</td>
+                <td>
+                    <form class="claim-form" method="post" action="{% url 'dashboard:reclamo_actualizar' reclamo.pk %}">
+                        {% csrf_token %}
+                        <label for="estado-{{ reclamo.pk }}">Estado</label>
+                        <select id="estado-{{ reclamo.pk }}" name="estado" class="form-select">
+                            {% for valor, etiqueta in estados %}<option value="{{ valor }}" {% if reclamo.estado == valor %}selected{% endif %}>{{ etiqueta }}</option>{% endfor %}
+                        </select>
+                        <label for="respuesta-{{ reclamo.pk }}">Respuesta para el cliente</label>
+                        <textarea id="respuesta-{{ reclamo.pk }}" name="respuesta_admin" rows="3" maxlength="2000" class="form-control">{{ reclamo.respuesta_admin }}</textarea>
+                        <button class="button button-small button-primary" type="submit">Guardar respuesta</button>
+                    </form>
+                </td>
+            </tr>
+        {% empty %}
+            <tr><td class="empty-cell" colspan="6">Todavía no hay quejas ni reclamos radicados.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

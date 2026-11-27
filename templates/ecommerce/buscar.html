@@ -1,0 +1,66 @@
+{% extends "base_store.html" %}
+{% load static stateless %}
+{% block title %}Catálogo — STATELESS{% endblock %}
+{% block extra_css %}<link href="{% static 'css/catalog.css' %}" rel="stylesheet">{% endblock %}
+{% block content %}
+<section class="buscar-page">
+<div class="buscar-wrap">
+
+    <h1>CATÁLOGO COMPLETO</h1>
+
+    <form action="{% url 'catalogo' %}" method="get" class="buscar-filtros">
+        <div>
+            <label class="sl-label" for="q">Palabra clave</label>
+            <input id="q" type="text" name="q" value="{{ query }}" class="sl-input" placeholder="Camiseta, gorra...">
+        </div>
+        <div>
+            <label class="sl-label" for="cat">Categoría</label>
+            <select id="cat" name="cat" class="sl-input">
+                <option value="">Todas</option>
+                {% for c in categorias %}
+                <option value="{{ c.id }}" {% if c.id == cat_seleccionada %}selected{% endif %}>{{ c.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="sl-label" for="max">Precio Máximo</label>
+            <input id="max" type="number" min="0" name="max" value="{{ max_precio }}" class="sl-input" placeholder="Ej: 100000">
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; padding-bottom:10px;">
+            <input type="checkbox" name="disponible" value="true" id="chk-disp" {% if solo_disponibles %}checked{% endif %}>
+            <label for="chk-disp" style="font-size:12px; letter-spacing:1px; cursor:pointer; margin:0;">SOLO DISPONIBLES</label>
+        </div>
+        <div><button type="submit" class="btn-filtrar">FILTRAR</button></div>
+    </form>
+
+    <p class="buscar-cuenta">{{ productos|length }} PRODUCTO{{ productos|length|pluralize:"S" }} ENCONTRADO{{ productos|length|pluralize:"S" }}</p>
+
+    <div class="buscar-grid">
+        {% for p in productos %}
+        <div class="buscar-card">
+            {% if p.agotado %}<span class="buscar-agotado">AGOTADO</span>{% endif %}
+            <a class="enlace" href="{% url 'producto' p.id %}">
+                <img src="{{ p.imagen_url }}" alt="{{ p.nombre }}" loading="lazy">
+                <p class="cat">{{ p.categoria.nombre }}</p>
+                <p class="nombre">{{ p.nombre }}</p>
+                <p class="precio">${{ p.precio|cop }}</p>
+            </a>
+            {% if p.agotado %}
+                <span class="btn-sl-outline agotado">AGOTADO</span>
+            {% else %}
+                <a href="{% url 'producto' p.id %}" class="btn-sl-outline">ELEGIR TALLA</a>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if not productos %}
+    <div class="buscar-vacio">
+        <p>No se encontraron productos con esos filtros.</p>
+        <a href="{% url 'catalogo' %}">LIMPIAR FILTROS</a>
+    </div>
+    {% endif %}
+
+</div>
+</section>
+{% endblock %}

@@ -1,0 +1,21 @@
+.waves-hero { background: #fff; height: 600px; width: 100%; position: relative; overflow: hidden; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 50px; }
+.waves-hero canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+.waves-hero-texto { position: relative; z-index: 2; text-align: center; }
+.waves-hero-texto p { font-size: 12px; letter-spacing: 5px; text-transform: uppercase; color: #111; margin-bottom: 15px; font-weight: 700; }
+.waves-hero-texto a { display: inline-block; padding: 14px 38px; border: 1px solid #111; color: #111; text-decoration: none; text-transform: uppercase; letter-spacing: 3px; font-size: 12px; font-weight: 600; background: rgba(255,255,255,0.85); backdrop-filter: blur(10px); }
+.waves-catalogo { padding: 60px 40px; max-width: 1200px; margin: 0 auto; }
+.waves-catalogo-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 36px; border-bottom: 1px solid #000; padding-bottom: 16px; }
+.waves-catalogo-head p { font-size: 11px; letter-spacing: 4px; text-transform: uppercase; opacity: 0.5; margin: 0; }
+.waves-catalogo-head h2 { font-family: 'Bebas Neue'; font-size: 48px; letter-spacing: 4px; margin: 0; }
+.waves-catalogo-head span { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.5; }
+.waves-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; }
+.waves-card { border: 1px solid #000; padding: 16px; background: #fff; position: relative; }
+.waves-card a.enlace { text-decoration: none; color: #000; }
+.waves-card img { width: 100%; aspect-ratio: 3/4; object-fit: cover; margin-bottom: 16px; display: block; }
+.waves-card .nombre { font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+.waves-card .precio { font-size: 13px; opacity: 0.6; margin-bottom: 12px; }
+.waves-btn { display: block; width: 100%; text-align: center; text-decoration: none; background: #000; color: #fff; border: 1px solid #000; padding: 12px; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; transition: all 0.2s; }
+.waves-btn:hover { background: #fff; color: #000; }
+.waves-btn.agotado { background: #eee; color: #888; border-color: #ccc; cursor: not-allowed; }
+.waves-agotado { position: absolute; top: 24px; left: 24px; background: #000; color: #fff; font-size: 10px; font-weight: 800; letter-spacing: 2px; padding: 4px 10px; z-index: 2; }
+.waves-vacio { grid-column: 1 / -1; text-align: center; padding: 60px 0; opacity: .3; font-family: 'Bebas Neue'; font-size: 24px; }

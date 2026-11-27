@@ -1,0 +1,39 @@
+.cart-page { background: #fff; color: #000; min-height: 85vh; padding: 60px 40px; }
+.cart-wrap { max-width: 1100px; margin: 0 auto; }
+.cart-head { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #000; padding-bottom: 16px; margin-bottom: 40px; }
+.cart-head p { font-size: 11px; letter-spacing: 4px; text-transform: uppercase; opacity: 0.5; margin: 0; }
+.cart-head h1 { font-family: 'Bebas Neue', sans-serif; font-size: 48px; letter-spacing: 4px; margin: 0; }
+.cart-head a { color: #000; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; text-decoration: underline; }
+.cart-vacio { text-align: center; padding: 80px 20px; }
+.cart-vacio p { font-family: 'Bebas Neue'; font-size: 32px; letter-spacing: 2px; opacity: 0.4; margin-bottom: 20px; }
+.cart-vacio a { display: inline-block; padding: 14px 36px; background: #000; color: #fff; text-decoration: none; font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; }
+.cart-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 40px; }
+.cart-item { display: flex; gap: 20px; padding: 20px 0; border-bottom: 1px solid #eee; align-items: center; }
+.cart-item img { width: 90px; aspect-ratio: 3/4; object-fit: cover; border: 1px solid #eee; }
+.cart-item .info { flex: 1; }
+.cart-item h3 { font-family: 'Bebas Neue'; font-size: 22px; letter-spacing: 2px; margin: 0 0 4px; }
+.cart-item .meta { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; opacity: 0.5; margin-bottom: 6px; }
+.cart-item .meta b { opacity: 1; font-weight: 700; color: #000; }
+.cart-item .precio { font-size: 13px; font-weight: 600; margin: 0; }
+.cart-item .problema { color: #c00; font-size: 12px; font-weight: 700; margin-top: 6px; }
+.cart-item .subtotal { min-width: 110px; text-align: right; font-size: 14px; font-weight: 700; }
+.qty-box { display: inline-flex; align-items: center; border: 1px solid #000; background: #fff; }
+.qty-btn { background: #fff; border: none; color: #000; width: 32px; height: 32px; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease; }
+.qty-btn:hover { background: #000; color: #fff; }
+.qty-input { width: 44px; height: 32px; border: none; border-left: 1px solid #000; border-right: 1px solid #000; text-align: center; font-weight: 700; font-size: 13px; outline: none; -moz-appearance: textfield; }
+.qty-input::-webkit-outer-spin-button, .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.btn-remove-item { background: transparent; border: none; color: #888; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; text-decoration: underline; padding: 0; margin-top: 6px; display: inline-block; }
+.btn-remove-item:hover { color: #c00; }
+.cart-resumen { background: #fafafa; border: 1px solid #eee; padding: 32px; height: fit-content; }
+.cart-resumen h3 { font-family: 'Bebas Neue'; font-size: 24px; letter-spacing: 2px; margin-bottom: 20px; border-bottom: 1px solid #000; padding-bottom: 10px; }
+.cart-resumen .fila { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 13px; }
+.cart-resumen .fila span:first-child { opacity: 0.6; }
+.cart-resumen .gratis { font-weight: 600; color: green; }
+.cart-resumen .total { display: flex; justify-content: space-between; margin: 20px 0 28px; border-top: 1px solid #ddd; padding-top: 20px; }
+.cart-resumen .total strong { font-size: 14px; letter-spacing: 1px; }
+.cart-resumen .total span { font-family: 'Bebas Neue'; font-size: 26px; }
+.btn-pagar { display: block; width: 100%; background: #000; color: #fff; text-align: center; padding: 16px; font-size: 12px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; text-decoration: none; transition: 0.2s; }
+.btn-pagar:hover { background: #333; color: #fff; }
+.btn-pagar.bloqueado { background: #ccc; color: #777; cursor: not-allowed; pointer-events: none; }
+.cart-bloqueo { color: #c00; font-size: 12px; font-weight: 600; margin-top: 12px; line-height: 1.5; }
+@media (max-width: 900px) { .cart-page { padding: 40px 20px; } .cart-grid { grid-template-columns: 1fr; } .cart-item { flex-wrap: wrap; } }

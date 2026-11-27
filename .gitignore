@@ -1,0 +1,14 @@
+.env
+venv/
+.venv/
+__pycache__/
+*.pyc
+db.sqlite3
+staticfiles/
+<<<<<<< HEAD
+media/
+=======
+>>>>>>> origin/api_pagos
+*.sql
+.vscode/
+.idea/

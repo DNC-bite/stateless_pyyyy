@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Panel STATELESS{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{% static 'css/admin_dashboard.css' %}" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+<div class="admin-shell">
+    <aside class="admin-sidebar">
+        <a class="admin-brand" href="{% url 'dashboard:inicio' %}">STATELESS<span>PANEL ADMINISTRADOR</span></a>
+        <nav class="admin-nav" aria-label="Administración">
+            <a class="{% if request.resolver_match.url_name == 'inicio' %}active{% endif %}" href="{% url 'dashboard:inicio' %}">Inicio</a>
+            <a class="{% if request.resolver_match.url_name == 'ventas' or request.resolver_match.url_name == 'venta_detalle' %}active{% endif %}" href="{% url 'dashboard:ventas' %}">Ventas</a>
+            <a class="{% if request.resolver_match.url_name == 'reclamos' or request.resolver_match.url_name == 'reclamo_actualizar' %}active{% endif %}" href="{% url 'dashboard:reclamos' %}">Quejas / Reclamos</a>
+            <a class="{% if request.resolver_match.url_name == 'asistente' %}active{% endif %}" href="{% url 'dashboard:asistente' %}">Asistente IA</a>
+            <a class="{% if request.resolver_match.url_name == 'usuarios' or request.resolver_match.url_name == 'usuario_editar' %}active{% endif %}" href="{% url 'dashboard:usuarios' %}">Usuarios</a>
+            <a class="{% if request.resolver_match.url_name == 'envios' %}active{% endif %}" href="{% url 'dashboard:envios' %}">Envíos</a>
+            <a class="{% if request.resolver_match.url_name == 'productos' or request.resolver_match.url_name == 'producto_crear' or request.resolver_match.url_name == 'producto_editar' %}active{% endif %}" href="{% url 'dashboard:productos' %}">Productos</a>
+            <a class="{% if request.resolver_match.url_name == 'proveedores' or request.resolver_match.url_name == 'proveedor_crear' or request.resolver_match.url_name == 'proveedor_editar' %}active{% endif %}" href="{% url 'dashboard:proveedores' %}">Proveedores</a>
+            <a class="{% if request.resolver_match.url_name == 'categorias' or request.resolver_match.url_name == 'categoria_crear' or request.resolver_match.url_name == 'categoria_editar' %}active{% endif %}" href="{% url 'dashboard:categorias' %}">Categorías</a>
+            <a class="{% if request.resolver_match.url_name == 'reportes' or request.resolver_match.url_name == 'reporte_exportar' %}active{% endif %}" href="{% url 'dashboard:reportes' %}">Reportes</a>
+        </nav>
+        <div class="admin-sidebar-footer">
+            <span>{{ request.user.email }}</span>
+            <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit">Salir</button></form>
+        </div>
+    </aside>
+    <main class="admin-main">
+        <header class="admin-topbar"><strong>PANEL DE CONTROL</strong><a href="{% url 'home' %}">← Ver tienda</a></header>
+        <div class="admin-content">
+            {% if messages %}
+                <div class="admin-messages" aria-live="polite">
+                    {% for message in messages %}<p class="message {{ message.tags }}">{{ message }}</p>{% endfor %}
+                </div>
+            {% endif %}
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+</div>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

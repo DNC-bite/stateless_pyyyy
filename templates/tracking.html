@@ -1,0 +1,95 @@
+{% load static stateless %}<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seguimiento de Pedido #{{ venta.id }} - STATELESS</title>
+    <link rel="icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="{% static 'css/tracking.css' %}" rel="stylesheet">
+</head>
+<body>
+
+<div class="container">
+
+    <div class="nav">
+        <a href="{% url 'home' %}" class="logo">STATELESS</a>
+        <a href="{% url 'pedidos' %}" class="nav-back">← Volver a Mis Compras</a>
+    </div>
+
+    <div class="header">
+        <div>
+            <p class="kicker">Seguimiento en Vivo</p>
+            <h1>PEDIDO #{{ venta.id }}</h1>
+        </div>
+        <div>
+            <span class="chip {% if venta.cancelada %}chip-cancelado{% elif venta.pago_pendiente %}chip-pendiente{% else %}chip-ok{% endif %}">{{ venta.get_estado_display|upper }}</span>
+        </div>
+    </div>
+
+    <div class="card">
+        {% if venta.cancelada %}
+        <div class="cancelado-aviso">
+            <h2>PEDIDO CANCELADO</h2>
+            <p>{% if venta.cancelled_at %}Este pedido se canceló el {{ venta.cancelled_at|date:"d/m/Y" }}. {% endif %}Si tienes dudas, escríbenos a {{ empresa_correo_soporte }}.</p>
+        </div>
+        {% else %}
+        <p class="label" style="text-align:center; margin-bottom:28px;">Progreso de Envío</p>
+        <div class="timeline">
+            <div class="timeline-step">
+                <div class="step-dot {% if envio.paso_actual >= 2 %}dot-active{% else %}dot-inactive{% endif %}">{% if envio.paso_actual >= 2 %}✓{% else %}1{% endif %}</div>
+                <div class="step-txt {% if envio.paso_actual >= 2 %}txt-active{% else %}txt-inactive{% endif %}">Confirmado</div>
+            </div>
+            <div class="timeline-step">
+                <div class="step-dot {% if envio.paso_actual >= 3 %}dot-active{% else %}dot-inactive{% endif %}">2</div>
+                <div class="step-txt {% if envio.paso_actual >= 3 %}txt-active{% else %}txt-inactive{% endif %}">En Bodega</div>
+            </div>
+            <div class="timeline-step">
+                <div class="step-dot {% if envio.paso_actual >= 4 %}dot-active{% else %}dot-inactive{% endif %}">3</div>
+                <div class="step-txt {% if envio.paso_actual >= 4 %}txt-active{% else %}txt-inactive{% endif %}">En Camino</div>
+            </div>
+            <div class="timeline-step">
+                <div class="step-dot {% if envio.paso_actual >= 5 %}dot-active{% else %}dot-inactive{% endif %}">4</div>
+                <div class="step-txt {% if envio.paso_actual >= 5 %}txt-active{% else %}txt-inactive{% endif %}">Entregado</div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="grid-2">
+        <div class="card">
+            <p class="label">Transportadora</p>
+            <p class="val">{{ envio.get_transportadora_display|default:"Por asignar" }}</p>
+            <hr>
+            <p class="label">Número de Guía</p>
+            <p class="val" style="font-family:monospace; letter-spacing:1px;">{{ envio.numero_guia|default:"Generándose en bodega" }}</p>
+        </div>
+
+        <div class="card">
+            <p class="label">Destino de Entrega</p>
+            <p class="val" style="margin-bottom:4px;">{{ envio.direccion }}{% if envio.apartamento %} · {{ envio.apartamento }}{% endif %}</p>
+            <p style="font-size:12px; color:#888; margin-bottom:16px;">{{ envio.ciudad }}{% if envio.departamento %}, {{ envio.departamento }}{% endif %}</p>
+            <hr>
+            <p class="label">Método de Pago</p>
+            <p class="val" style="text-transform:uppercase;">{{ venta.get_metodo_pago_display }}</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="total-fila">
+            <div>
+                <p class="label">{% if venta.pago_pendiente %}Total a Pagar{% else %}Total Liquidado{% endif %} (Inc. IVA 19%)</p>
+                <p class="total-monto">${{ venta.total|cop }} COP</p>
+            </div>
+            <div>
+                <a href="{% url 'factura' venta.id %}" class="btn-factura">Ver Factura Oficial →</a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

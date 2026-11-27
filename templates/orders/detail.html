@@ -1,0 +1,63 @@
+{% extends "base_store.html" %}
+{% load stateless %}
+{% block title %}Pedido {{ order.numero_factura }} — STATELESS{% endblock %}
+{% block content %}
+<main class="container py-5">
+    <p><a class="link-secondary" href="{% url 'pedidos' %}">← Mis pedidos</a></p>
+    <div class="d-flex justify-content-between flex-wrap gap-2 align-items-start mb-4">
+        <div>
+            <h1>{{ order.numero_factura }}</h1>
+            <p class="text-secondary mb-0">{{ order.created_at|date:"d/m/Y H:i" }}</p>
+        </div>
+        <span class="badge text-bg-secondary">{{ order.get_estado_display }}</span>
+    </div>
+    {% if payment_result == "exitoso" %}
+        <div class="alert alert-info">Mercado Pago recibió el resultado. El estado se actualizará cuando se confirme la notificación.</div>
+    {% elif payment_result == "pendiente" %}
+        <div class="alert alert-info">Tu pago está pendiente de confirmación.</div>
+    {% elif payment_result == "fallido" %}
+        <div class="alert alert-warning">El pago no se completó. Puedes intentarlo de nuevo desde este pedido.</div>
+    {% endif %}
+    <div class="row g-4">
+        <section class="col-lg-7">
+            <h2 class="h4">Productos</h2>
+            {% for item in order.items.all %}
+                <article class="d-flex justify-content-between border-bottom border-secondary py-3">
+                    <div>
+                        <strong>{{ item.producto.nombre }}</strong>
+                        {% if item.variante %}<div class="text-secondary">{{ item.variante.color }}</div>{% endif %}
+                        {% if item.talla %}<div class="text-secondary">Talla: {{ item.talla }}</div>{% endif %}
+                        <div class="text-secondary">{{ item.cantidad }} × ${{ item.precio_unitario|cop }}</div>
+                    </div>
+                    <strong>${{ item.subtotal|cop }}</strong>
+                </article>
+            {% endfor %}
+            <p class="d-flex justify-content-between mt-3">
+                <span>Total</span><strong>${{ order.total|cop }} COP</strong>
+            </p>
+        </section>
+        <aside class="col-lg-5">
+            <h2 class="h4">Envío</h2>
+            {% if shipment %}
+                <p>{{ shipment.destinatario }}<br>{{ shipment.telefono }}<br>
+                    {{ shipment.direccion }}{% if shipment.apartamento %}, {{ shipment.apartamento }}{% endif %}<br>
+                    {{ shipment.ciudad }}, {{ shipment.departamento }}
+                </p>
+            {% else %}
+                <p class="text-secondary">No hay información de envío registrada.</p>
+            {% endif %}
+            {% if payment %}
+                <h2 class="h5 mt-4">Pago</h2>
+                <p>{{ payment.get_status_display }}{% if payment.status_detail %} · {{ payment.status_detail }}{% endif %}</p>
+            {% endif %}
+            {% if order.estado == "pendiente_pago" %}
+                <form method="post" action="{% url 'pagar_pedido' order.id %}">
+                    {% csrf_token %}
+                    <button class="btn btn-light w-100" type="submit">Pagar con Mercado Pago</button>
+                </form>
+                <p class="small text-secondary mt-2">El pago requiere que Mercado Pago esté configurado en el servidor.</p>
+            {% endif %}
+        </aside>
+    </div>
+</main>
+{% endblock %}

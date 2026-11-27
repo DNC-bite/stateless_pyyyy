@@ -1,0 +1,37 @@
+{% extends "dashboard/base.html" %}
+{% load dashboard_tags %}
+{% block title %}Pedido #{{ venta.id }} · Panel STATELESS{% endblock %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">Pedido #{{ venta.id }}</p><h1>Detalle de la venta</h1></div><a class="button" href="{% url 'dashboard:ventas' %}">Volver a ventas</a></div>
+<section class="detail-grid">
+    <article class="panel-card">
+        <h2>Cliente y pago</h2>
+        <dl class="detail-list">
+            <dt>Nombre</dt><dd>{{ venta.usuario.name }}</dd><dt>Correo</dt><dd>{{ venta.usuario.email }}</dd>
+            <dt>Fecha</dt><dd>{{ venta.created_at|date:"d/m/Y H:i" }}</dd><dt>Método de pago</dt><dd>{{ venta.get_metodo_pago_display }}</dd>
+            <dt>Estado</dt><dd>{{ venta.get_estado_display }}</dd><dt>Total</dt><dd><strong>{{ venta.total|cop }}</strong></dd>
+        </dl>
+        <a class="button" href="{% url 'factura' venta.pk %}">Ver factura</a>
+    </article>
+    <article class="panel-card">
+        <h2>Entrega</h2>
+        {% if envio %}
+            <dl class="detail-list">
+                <dt>Destinatario</dt><dd>{{ envio.destinatario }}</dd><dt>Teléfono</dt><dd>{{ envio.telefono }}</dd>
+                <dt>Dirección</dt><dd>{{ envio.direccion }}{% if envio.apartamento %}, {{ envio.apartamento }}{% endif %}</dd>
+                <dt>Ciudad</dt><dd>{{ envio.ciudad }}, {{ envio.departamento }}</dd>
+                <dt>Transportadora</dt><dd>{{ envio.get_transportadora_display|default:"Sin asignar" }}</dd>
+                <dt>Guía</dt><dd>{{ envio.numero_guia|default:"Sin asignar" }}</dd>
+            </dl>
+        {% else %}<p>No hay información de envío para este pedido.</p>{% endif %}
+    </article>
+</section>
+<article class="panel-card">
+    <h2>Productos</h2>
+    <div class="table-wrap"><table><thead><tr><th>Producto</th><th>Variante</th><th>Talla</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th></tr></thead>
+        <tbody>{% for item in items %}
+            <tr><td>{{ item.producto.nombre }}</td><td>{{ item.variante.color|default:"Original" }}</td><td>{{ item.talla|default:"—" }}</td><td>{{ item.cantidad }}</td><td>{{ item.precio_unitario|cop }}</td><td>{{ item.subtotal|cop }}</td></tr>
+        {% empty %}<tr><td class="empty-cell" colspan="6">Este pedido no tiene productos asociados.</td></tr>{% endfor %}</tbody>
+    </table></div>
+</article>
+{% endblock %}
